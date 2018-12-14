@@ -1,0 +1,223 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create Inspector targets, template, and schedule.
+Mappings:
+  MapEnvironmentParams:
+
+    InspectorCronExpressionParam:
+      dev: "cron(0 15 ? * 4 *)"
+      test: "cron(0 15 ? * 2 *)"
+      prod: "cron(0 15 ? * 5 *)"
+
+    #
+    # LambdaCodeResourceBucketParam:
+    #   dev: cu-commercial-sandbox-pinnacle-resources
+    #   test: cu-commercial-pinnacle-resources
+    #   prod: cu-commercial-pinnacle-resources
+
+Parameters:
+
+  MonikerParam:
+    Default: cu-example
+    Description: Cornell moniker for the current AWS account
+    Type: String
+
+  # ApplicationTagParam:
+  #   Default: pinnacle
+  #   Description: Application tag value. Allowed values A-Z, a-z, 0-9, "-", "_"
+  #   Type: String
+  #   # \x2D = hyphen; \x5F = underscore
+  #   AllowedPattern: "[A-Za-z0-9\x2D\x5F]+"
+  EnvironmentParam:
+    Default: test
+    AllowedValues: ['dev', 'test', 'prod']
+    Description: Value to use for Environment tag value and to use to lookup mappings
+    Type: String
+  # DeadLetterSNSTopicParam:
+  #   Default:
+  #   Description: SNS topic where failures should be reported
+  #   Type: String
+  # InspectorReportSenderEmailParam:
+  #   Default: me@gmail.com
+  #   Description: The email address Inspector reports are sent FROM
+  #   Type: String
+  # InspectorReportRecipientEmailsParam:
+  #   Default: "me@gmail.com, metoo@cornell.edu"
+  #   Description: List of comma-separated email addresses Inspector reports are sent TO
+  #   Type: String
+  # InpectorReporterLambdaCodeS3KeyParam:
+  #   Default: lambda/inspector-reporter-v1.0.zip
+  #   Description: Key to Inspector Reporter Lambda function source code package
+  #   Type: String
+  InspectorAssessmentDurationParam:
+    Default: 3600
+    Description: Number of seconds Inspector should run its assessments; 3600 minimum recommended
+    Type: String
+
+Resources:
+
+  DefaultInspectorTargetGroup:
+    Type: "AWS::Inspector::ResourceGroup"
+    Properties:
+      ResourceGroupTags:
+        -
+          Key: Inspector Group
+          Value: default
+
+  DefaultInspectorAssessmentTarget:
+    Type: "AWS::Inspector::AssessmentTarget"
+    Properties:
+      AssessmentTargetName: Default Assessment Group Target
+      ResourceGroupArn: !GetAtt DefaultInspectorTargetGroup.Arn
+
+  DefaultInspectorAssessmentTemplate:
+    Type: "AWS::Inspector::AssessmentTemplate"
+    Properties:
+      AssessmentTargetArn: !GetAtt DefaultInspectorAssessmentTarget.Arn
+      DurationInSeconds: !Ref InspectorAssessmentDurationParam
+      AssessmentTemplateName: !Sub "${MonikerParam} Default Assessment Template"
+
+      RulesPackageArns:
+        # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_rules-arns.html
+        # Common Vulnerabilities and Exposures
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+        # Security Best Practices
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+      # UserAttributesForFindings:
+      #   -
+      #     Key: Application
+      #     Value: !Ref ApplicationTagParam
+      #   -
+      #     Key: Environment
+      #     Value: !Ref EnvironmentParam
+
+  DefaultInspectorSchedule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description:  Periodicly run Inspector on default targets"
+      # EventPattern: JSON object
+      # Name: default-inspector-schedule
+      ScheduleExpression: !FindInMap [ MapEnvironmentParams, InspectorCronExpressionParam, !Ref EnvironmentParam]
+      State: ENABLED
+      Targets:
+        -
+          Arn: !GetAtt DefaultInspectorAssessmentTemplate.Arn
+          # EcsParameters:
+          #   EcsParameters
+          Id: default-inspector-assessment
+          # Input: String
+          # InputPath: String
+          # InputTransformer:
+          #   InputTransformer
+          # KinesisParameters:
+          #   KinesisParameters
+          RoleArn: !GetAtt InspectorAssessmentRole.Arn
+          # RunCommandParameters:
+          #   RunCommandParameters
+
+  InspectorAssessmentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      # RoleName: inspector-assessment-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+                Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        -
+          PolicyName: run-inspector-assessments
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - inspector:StartAssessmentRun
+                Resource: '*'
+
+  # InspectorReporterRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub "${ApplicationTagParam}-${EnvironmentParam}-inspector-reporter-role"
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         -
+  #           Effect: Allow
+  #           Principal:
+  #               Service: lambda.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  #     Policies:
+  #       -
+  #         PolicyName: inline-policy
+  #         PolicyDocument:
+  #           Version: '2012-10-17'
+  #           Statement:
+  #             -
+  #               Sid: getInspectorInfo
+  #               Effect: Allow
+  #               Action:
+  #                 - inspector:GetAssessmentReport
+  #                 - "inspector:Describe*"
+  #               Resource: "*"
+  #             -
+  #               Sid: sendEmail
+  #               Effect: Allow
+  #               Action:
+  #                 - ses:SendEmail
+  #                 - ses:SendRawEmail
+  #               Resource: "*"
+  #             -
+  #               Sid: sendSns
+  #               Effect: Allow
+  #               Action:
+  #                 - sns:Publish
+  #               Resource: !Ref DeadLetterSNSTopicParam
+
+  # InspectorReportLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   Properties:
+  #     LogGroupName: !Sub "/aws/lambda/${ApplicationTagParam}-${EnvironmentParam}-inspector-reporter"
+  #     RetentionInDays: 180
+  #
+  # InspectorReporter:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     # There is no explicit way to link the lambda function to the log group
+  #     Code:
+  #       S3Bucket: !FindInMap [ MapEnvironmentParams, LambdaCodeResourceBucketParam, !Ref EnvironmentParam]
+  #       S3Key: !Ref InpectorReporterLambdaCodeS3KeyParam
+  #       # S3ObjectVersion: String
+  #       # ZipFile: String
+  #     DeadLetterConfig:
+  #       TargetArn: !Ref DeadLetterSNSTopicParam
+  #     Description: Send out reports based on Inspector assessments
+  #     Environment:
+  #       Variables:
+  #         EMAIL_FROM_ADDRESS: !Ref InspectorReportSenderEmailParam
+  #         EMAIL_TO_ADDRESSES: !Ref InspectorReportRecipientEmailsParam
+  #     FunctionName: !Sub "${ApplicationTagParam}-${EnvironmentParam}-inspector-reporter"
+  #     Handler: inspector-reporter/index.handler
+  #     # KmsKeyArn: String
+  #     MemorySize: 128
+  #     # ReservedConcurrentExecutions: Integer
+  #     Role: !GetAtt InspectorReporterRole.Arn
+  #     Runtime: nodejs6.10
+  #     Timeout: 15
+  #     # TracingConfig:
+  #     #   TracingConfig
+  #     # VpcConfig:
+  #     #   VPCConfig
+  #     Tags:
+  #       -
+  #         Key: Application
+  #         Value: !Ref ApplicationTagParam
+  #       -
+  #         Key: Environment
+  #         Value: !Ref EnvironmentParam

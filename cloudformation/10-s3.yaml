@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create standard bucket for patching and maintenance logging
+
+Parameters:
+
+  LoggingBucketNamePrefixParam:
+    Default: patching-logs
+    Description: S3 Logging bucket will be named `${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}`
+    Type: String
+
+Resources:
+
+  LoggingS3Bucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      # AccessControl: String
+      BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+      # CorsConfiguration:
+      #   CORS Configuration
+      LifecycleConfiguration:
+        Rules:
+          -
+            # ExpirationDate: String
+            ExpirationInDays: 30
+            Id: Expire30Days
+            # NoncurrentVersionExpirationInDays: Integer
+            # NoncurrentVersionTransition (deprecated):
+            #   NoncurrentVersionTransition type
+            # NoncurrentVersionTransitions:
+            #   - NoncurrentVersionTransition type
+            # Prefix: String
+            Status: Enabled
+            # Transition (deprecated):
+            #   Transition type
+            # Transitions:
+            #  -
+            #   StorageClass: GLACIER
+            #  TransitionDate: String
+            #   TransitionInDays: 30
+      # LoggingConfiguration:
+      #   Logging Configuration
+      # NotificationConfiguration:
+      #   Notification Configuration
+      # ReplicationConfiguration:
+      #   Replication Configuration
+      Tags:
+        -
+          Key: Application
+          Value: infrastructure
+      # VersioningConfiguration:
+      #   Versioning Configuration
+      # WebsiteConfiguration:
+      #   Website Configuration Type

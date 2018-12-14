@@ -1,0 +1,638 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create standard maintenance windows and patch baseline scans and installs
+
+Mappings:
+
+  MapEnvironmentParams:
+
+    NowCronSchedule:
+      24x7a: 'cron(0 50 12 ? * MON *)'
+      24x7b: 'cron(0 50 12 ? * MON *)'
+      24x7c: 'cron(0 50 12 ? * MON *)'
+      9x5default: 'cron(0 50 12 ? * MON *)'
+      weeklytasks: 'cron(0 35 12 ? * MON *)'
+      weeklyscans: 'cron(0 0 13 ? * MON *)'
+
+    TestCronSchedule:
+      24x7a: 'cron(0 0 11 ? * MON *)'
+      24x7b: 'cron(0 0 11 ? * TUE *)'
+      24x7c: 'cron(0 0 11 ? * WED *)'
+      9x5default: 'cron(0 15 12 ? * MON *)'
+      weeklytasks: 'cron(0 5 12 ? * MON *)'
+      weeklyscans: 'cron(0 5 12 ? * WED *)'
+
+    ProdCronSchedule:
+      24x7a: 'cron(0 0 11 ? * TUE *)'
+      24x7b: 'cron(0 0 11 ? * WED *)'
+      24x7c: 'cron(0 0 11 ? * THU *)'
+      9x5default: 'cron(0 5 12 ? * TUE *)'
+      weeklytasks: 'cron(0 5 12 ? * MON *)'
+      weeklyscans: 'cron(0 5 12 ? * THU *)'
+
+
+Parameters:
+
+  LoggingBucketNamePrefixParam:
+    Default: patching-logs
+    Description: S3 Logging bucket will be named `${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}`
+    Type: String
+
+  CronScheduleGroupParam:
+    Default: TestCronSchedule
+    Description: Which set of cron schedules should be used?
+    Type: String
+    AllowedValues:
+      - NowCronSchedule
+      - TestCronSchedule
+      - ProdCronSchedule
+
+  PatchBaselineActionParam:
+    Default: Scan
+    Description: Scan or Install?
+    Type: String
+    AllowedValues:
+      - Scan
+      - Install
+
+Resources:
+
+  SSMPatchingInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      # Policies:
+      #   - Policies
+      # RoleName: String
+
+  SSMPatchingInstanceRoleProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      # Path: String
+      Roles:
+        - !Ref SSMPatchingInstanceRole
+      # InstanceProfileName: String
+
+  WeeklyTasksMaintenanceWindow:
+    Type: "AWS::SSM::MaintenanceWindow"
+    Properties:
+      Description: Weekly Tasks
+      AllowUnassociatedTargets: true
+      Cutoff: 0
+      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , weeklytasks ]
+      Duration: 1
+      Name: weekly-tasks-all
+
+  WeeklyScansMaintenanceWindow:
+    Type: "AWS::SSM::MaintenanceWindow"
+    Properties:
+      Description: Weekly Scans
+      AllowUnassociatedTargets: true
+      Cutoff: 0
+      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , weeklyscans ]
+      Duration: 1
+      Name: weekly-scans-all
+
+  Default9x5MaintenanceWindow:
+    Type: "AWS::SSM::MaintenanceWindow"
+    Properties:
+      Description: 9x5 Default
+      AllowUnassociatedTargets: true
+      Cutoff: 0
+      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 9x5default ]
+      Duration: 1
+      Name: 9x5-default
+
+  GroupA24x7MaintenanceWindow:
+    Type: "AWS::SSM::MaintenanceWindow"
+    Properties:
+      Description: 24x7 Group A
+      AllowUnassociatedTargets: true
+      Cutoff: 0
+      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 24x7a ]
+      Duration: 1
+      Name: 24x7-group-a
+
+  GroupB24x7MaintenanceWindow:
+    Type: "AWS::SSM::MaintenanceWindow"
+    Properties:
+      Description: 24x7 Group B
+      AllowUnassociatedTargets: true
+      Cutoff: 0
+      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 24x7b ]
+      Duration: 1
+      Name: 24x7-group-b
+
+  GroupC24x7MaintenanceWindow:
+    Type: "AWS::SSM::MaintenanceWindow"
+    Properties:
+      Description: 24x7 Group C
+      AllowUnassociatedTargets: true
+      Cutoff: 0
+      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 24x7c ]
+      Duration: 1
+      Name: 24x7-group-c
+
+
+  WeeklyTasksMaintenanceWindowTarget:
+    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Properties:
+      OwnerInformation: Weekly Tasks
+      Description: Weekly Tasks
+      WindowId: !Ref WeeklyTasksMaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - 9x5-default
+            - 24x7-group-a
+            - 24x7-group-b
+            - 24x7-group-c
+      Name: weekly-task-targets
+
+  WeeklyScansMaintenanceWindowTarget:
+    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Properties:
+      OwnerInformation: Weekly Tasks
+      Description: Weekly Tasks
+      WindowId: !Ref WeeklyScansMaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - immutable
+            - 9x5-default
+            - 24x7-group-a
+            - 24x7-group-b
+            - 24x7-group-c
+      Name: weekly-task-targets
+
+  Default9x5MaintenanceWindowTarget:
+    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Properties:
+      OwnerInformation: 9x5 Default
+      Description: 9x5 Default
+      WindowId: !Ref Default9x5MaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - 9x5-default
+      Name: 9x5-default-targets
+
+  GroupA24x7MaintenanceWindowTarget:
+    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Properties:
+      OwnerInformation: Group A 24x7
+      Description: Group A 24x7
+      WindowId: !Ref GroupA24x7MaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - 24x7-group-a
+      Name: 24x7-group-a-targets
+
+  GroupB24x7MaintenanceWindowTarget:
+    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Properties:
+      OwnerInformation: Group B 24x7
+      Description: Group B 24x7
+      WindowId: !Ref GroupB24x7MaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - 24x7-group-b
+      Name: 24x7-group-b-targets
+
+  GroupC24x7MaintenanceWindowTarget:
+    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Properties:
+      OwnerInformation: Group C 24x7
+      Description: Group C 24x7
+      WindowId: !Ref GroupC24x7MaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - 24x7-group-c
+      Name: 24x7-group-c-targets
+
+  SSMMaintenanceWindowTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      # RoleName: ssm-maintenance-window-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+                Service: ssm.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Policies:
+        -
+          PolicyName: log-to-S3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  !Sub "arn:aws:s3:::${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}/*"
+        -
+          PolicyName: pass-role
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
+
+  SSMMaintenanceWindowTaskCommandRole:
+    Type: AWS::IAM::Role
+    Properties:
+      # RoleName: ssm-maintenance-window-task-cmd-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+                Service: ssm.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Policies:
+        -
+          PolicyName: log-to-S3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  !Sub "arn:aws:s3:::${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}/*"
+
+  UpdateInspectorAgentTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Update/install Inspector agent
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 20
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref WeeklyTasksMaintenanceWindowTarget
+      Name: update-inspector-agent
+      TaskArn: AmazonInspector-ManageAWSAgent
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          # TimeoutSeconds: Integer
+          # Comment: String
+          # OutputS3KeyPrefix: String
+          Parameters: { "Operation": [ "Install" ] }
+            # JSON object
+          # DocumentHashType: String
+          # ServiceRoleArn: String
+          # NotificationConfig:
+          #   NotificationConfig
+          # OutputS3BucketName: String
+          # DocumentHash: String
+      WindowId: !Ref WeeklyTasksMaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  WeeklyUpdateSSMAgentTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Update SSM agent
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 10
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref WeeklyTasksMaintenanceWindowTarget
+      Name: update-ssm-agent
+      TaskArn: AWS-UpdateSSMAgent
+      # TaskInvocationParameters:
+      #   MaintenanceWindowRunCommandParameters: { "Operation": [ "Install" ] }
+      WindowId: !Ref WeeklyTasksMaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  WeeklyScanPatchBaselineTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Patch baseline scan
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 30
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref WeeklyScansMaintenanceWindowTarget
+      Name: run-patch-baseline
+      TaskArn: AWS-RunPatchBaseline
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          # TimeoutSeconds: Integer
+          Comment: Run patch baseline scan
+          OutputS3KeyPrefix: run-patch-baseline-logs
+          Parameters: { "Operation": [ "Scan" ] }
+          # DocumentHashType: String
+          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
+          NotificationConfig:
+              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationEvents:
+                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
+                  - Success
+                  - TimedOut
+                  - Cancelled
+                  - Failed
+              NotificationType: Command
+          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+          # DocumentHash: String
+      WindowId: !Ref WeeklyScansMaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  Default9x5PatchBaselineTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Patch baseline scan
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 30
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref Default9x5MaintenanceWindowTarget
+      Name: run-patch-baseline
+      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          # TimeoutSeconds: Integer
+          Comment: Run patch baseline scan
+          OutputS3KeyPrefix: run-patch-baseline-logs
+          # Parameters:
+          #   Operation:
+          #     - !Ref PatchBaselineActionParam
+          # DocumentHashType: String
+          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
+          NotificationConfig:
+              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationEvents:
+                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
+                  - Success
+                  - TimedOut
+                  - Cancelled
+                  - Failed
+              NotificationType: Command
+          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+          # DocumentHash: String
+      WindowId: !Ref Default9x5MaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  AAAPatchBaselineTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Patch baseline scan
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 30
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref GroupA24x7MaintenanceWindowTarget
+      Name: run-patch-baseline
+      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          # TimeoutSeconds: Integer
+          Comment: Run patch baseline scan
+          OutputS3KeyPrefix: run-patch-baseline-logs
+          # Parameters:
+          #   Operation:
+          #     - !Ref PatchBaselineActionParam
+          # DocumentHashType: String
+          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
+          NotificationConfig:
+              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationEvents:
+                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
+                  - Success
+                  - TimedOut
+                  - Cancelled
+                  - Failed
+              NotificationType: Command
+          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+          # DocumentHash: String
+      WindowId: !Ref GroupA24x7MaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  BBBPatchBaselineTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Patch baseline scan
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 30
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref GroupB24x7MaintenanceWindowTarget
+      Name: run-patch-baseline
+      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          # TimeoutSeconds: Integer
+          Comment: Run patch baseline scan
+          OutputS3KeyPrefix: run-patch-baseline-logs
+          # Parameters:
+          #   Operation:
+          #     - !Ref PatchBaselineActionParam
+          # DocumentHashType: String
+          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
+          NotificationConfig:
+              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationEvents:
+                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
+                  - Success
+                  - TimedOut
+                  - Cancelled
+                  - Failed
+              NotificationType: Command
+          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+          # DocumentHash: String
+      WindowId: !Ref GroupB24x7MaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  CCCPatchBaselineTask:
+    Type: "AWS::SSM::MaintenanceWindowTask"
+    Properties:
+      MaxErrors: 1
+      Description: Patch baseline scan
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
+      Priority: 30
+      MaxConcurrency: 100%
+      Targets:
+        -
+          Key: WindowTargetIds
+          Values:
+            - !Ref GroupC24x7MaintenanceWindowTarget
+      Name: run-patch-baseline
+      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          # TimeoutSeconds: Integer
+          Comment: Run patch baseline scan
+          OutputS3KeyPrefix: run-patch-baseline-logs
+          # Parameters:
+          #   Operation:
+          #     - !Ref PatchBaselineActionParam
+          # DocumentHashType: String
+          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
+          NotificationConfig:
+              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationEvents:
+                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
+                  - Success
+                  - TimedOut
+                  - Cancelled
+                  - Failed
+              NotificationType: Command
+          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+          # DocumentHash: String
+      WindowId: !Ref GroupC24x7MaintenanceWindow
+      # TaskParameters:
+      #   JSON object
+      TaskType: RUN_COMMAND
+      LoggingInfo:
+        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+        Region: !Ref AWS::Region
+        S3Prefix: maintenance-window-task-logs
+
+  PatchAndRemoveKernelsSSMDoc:
+    Type: "AWS::SSM::Document"
+    Properties:
+      DocumentType: Command
+      Content:
+        schemaVersion: '2.2'
+        description: "PatchBaseline Scan/Install Linux/Windows; Remove old Linux kernels so Inspector won't trip on them"
+        parameters: {}
+        mainSteps:
+        - action: aws:runDocument
+          name: PatchBaseline
+          inputs:
+            documentType: SSMDocument
+            documentPath: AWS-RunPatchBaseline
+            documentParameters:
+              Operation: !Ref PatchBaselineActionParam
+        - action: aws:runShellScript
+          name: removeOldKernels
+          precondition:
+            StringEquals:
+              - platformType
+              - Linux
+          inputs:
+            workingDirectory: /tmp
+            timeoutSeconds: 300
+            runCommand:
+              - "#!/bin/bash"
+              - if [ -n "$(command -v yum)" ] ; then
+              -   echo Using yum
+              -   uname -r
+              -   echo Kernels before cleanup
+              -   rpm -qa kernel
+              -   package-cleanup --oldkernels --count 1 -y
+              -   echo Kernels after cleanup
+              -   rpm -qa kernel
+              - elif [ -n "$(command -v apt-get)" ] ; then
+              -   echo Using apt-get
+              -   echo Kernels before cleanup
+              -   dpkg --list | grep linux-image
+              -   apt autoremove --purge
+              -   echo Kernels after cleanup
+              -   dpkg --list | grep linux-image
+              - else
+              -   echo Not using yum or apt-get
+              -   echo Unsupported Linux distribution
+              -   exit 1
+              - fi
