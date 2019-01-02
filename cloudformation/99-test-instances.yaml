@@ -185,7 +185,6 @@ Resources:
           Values:
             - test
 
-
   PatchAndRemoveKernelsSSMDoc:
     Type: "AWS::SSM::Document"
     Properties:
@@ -323,6 +322,8 @@ Resources:
                 Value: test
               - Key: lifecycle-policy
                 Value: !Sub "limit-stop:${LimitHoursParam}"
+              - Key: Patch Group
+                Value: cu-cit-cloud-team-patching
           - ResourceType: volume
             Tags:
               - Key: Application
