@@ -1,0 +1,701 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create a set of EC2 instances to use for testing SSM documents
+
+Mappings:
+
+  MapOSParams:
+    AMIParam:
+      RHEL7: ami-a8d369c0 # RHEL-7.0_HVM_GA-20141017-x86_64-1-Hourly2-GP2
+      RHEL6: ami-3218595b # RHEL-6.4_HVM_GA-x86_64-10-HVM-Hourly2
+
+      AmazonLinux2: ami-013be31976ca2c322 # amzn2-ami-hvm-2.0.20181024-x86_64-gp2
+      AmazonLinux: ami-0ff8a91507f77f867 # amzn-ami-hvm-2018.03.0.20180811-x86_64-gp2
+      AmazonLinuxECS: ami-13401669 # amzn-ami-2017.09.e-amazon-ecs-optimized
+
+      Ubuntu1804: ami-432eb53c # ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20180522
+      Ubuntu1604: ami-0f9351b59be17920e
+      Ubuntu1404: ami-8827efe0 # ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20140724
+
+      # Centos7: ami-02e98f78 # CentOS Linux 7 x86_64 HVM EBS 1708_11.01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-95096eef.4
+      # patching association fails for ami-02e98f78 using AWS default Centos patch baseline
+      Centos7: ami-9887c6e7 # CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4
+      # patching association succeeds for ami-9887c6e7 using AWS default Centos patch baseline
+
+      Centos6: ami-e3fdd999 # CentOS Linux 6 x86_64 HVM EBS 1801_01-74e73035-3435-48d6-88e0-89cc02ad83ee-ami-5d381c27.4
+
+Parameters:
+
+  KeyPairParam:
+    Default: pea1
+    Description: Which keypair to use for instance access
+    Type: AWS::EC2::KeyPair::KeyName
+
+  VPCParam:
+    Default: vpc-71070114
+    Description: VPC in which to launch instances
+    Type: AWS::EC2::VPC::Id
+
+  SubnetParam:
+    Default: subnet-dd8519f6
+    Description: Subnet in which to launch instances
+    Type: AWS::EC2::Subnet::Id
+
+  LimitHoursParam:
+    Default: 4
+    Description: How many hours before limit-stop?
+    Type: Number
+
+  PatchBaselineActionParam:
+    Default: Install
+    Description: Scan or Install?
+    Type: String
+    AllowedValues:
+      - Scan
+      - Install
+
+  InspectorAssessmentDurationParam:
+    Default: 900
+    Description: Number of seconds Inspector should run its assessments; 3600 minimum recommended
+    Type: String
+
+Resources:
+
+  LinuxPatchingLoggingS3Bucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      # AccessControl: String
+      # BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+      # CorsConfiguration:
+      #   CORS Configuration
+      LifecycleConfiguration:
+        Rules:
+          -
+            # ExpirationDate: String
+            ExpirationInDays: 7
+            Id: Expire7Days
+            # NoncurrentVersionExpirationInDays: Integer
+            # NoncurrentVersionTransition (deprecated):
+            #   NoncurrentVersionTransition type
+            # NoncurrentVersionTransitions:
+            #   - NoncurrentVersionTransition type
+            # Prefix: String
+            Status: Enabled
+            # Transition (deprecated):
+            #   Transition type
+            # Transitions:
+            #  -
+            #   StorageClass: GLACIER
+            #  TransitionDate: String
+            #   TransitionInDays: 30
+      # LoggingConfiguration:
+      #   Logging Configuration
+      # NotificationConfiguration:
+      #   Notification Configuration
+      # ReplicationConfiguration:
+      #   Replication Configuration
+      Tags:
+        - Key: Application
+          Value: sandbox
+        - Key: Environment
+          Value: dev
+        - Key: to-be-deleted
+          Value: now
+      # VersioningConfiguration:
+      #   Versioning Configuration
+      # WebsiteConfiguration:
+      #   Website Configuration Type
+
+### AMAZON LINUX 1 & 2
+
+  TestAmazonInspectorTargetGroup:
+    Type: "AWS::Inspector::ResourceGroup"
+    Properties:
+      ResourceGroupTags:
+        - Key: Inspector Group
+          Value: test-amazon
+
+  TestAmazonInspectorAssessmentTarget:
+    Type: "AWS::Inspector::AssessmentTarget"
+    Properties:
+      ResourceGroupArn: !GetAtt TestAmazonInspectorTargetGroup.Arn
+
+  TestAmazonInspectorAssessmentTemplate:
+    Type: "AWS::Inspector::AssessmentTemplate"
+    Properties:
+      AssessmentTargetArn: !GetAtt TestAmazonInspectorAssessmentTarget.Arn
+      DurationInSeconds: !Ref InspectorAssessmentDurationParam
+      # AssessmentTemplateName:
+      RulesPackageArns:
+        # Common Vulnerabilities and Exposures
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+        # Security Best Practices
+        # - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+      UserAttributesForFindings:
+        -
+          Key: Inspector Group
+          Value: test-amazon
+
+### RHEL
+
+  TestRHELInspectorTargetGroup:
+    Type: "AWS::Inspector::ResourceGroup"
+    Properties:
+      ResourceGroupTags:
+        - Key: Inspector Group
+          Value: test-rhel
+
+  TestRHELInspectorAssessmentTarget:
+    Type: "AWS::Inspector::AssessmentTarget"
+    Properties:
+      ResourceGroupArn: !GetAtt TestRHELInspectorTargetGroup.Arn
+
+  TestRHELInspectorAssessmentTemplate:
+    Type: "AWS::Inspector::AssessmentTemplate"
+    Properties:
+      AssessmentTargetArn: !GetAtt TestRHELInspectorAssessmentTarget.Arn
+      DurationInSeconds: !Ref InspectorAssessmentDurationParam
+      # AssessmentTemplateName:
+      RulesPackageArns:
+        # Common Vulnerabilities and Exposures
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+        # Security Best Practices
+        # - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+      UserAttributesForFindings:
+        -
+          Key: Inspector Group
+          Value: test-rhel
+
+
+### UBUNTU
+
+  TestUbuntuInspectorTargetGroup:
+    Type: "AWS::Inspector::ResourceGroup"
+    Properties:
+      ResourceGroupTags:
+        - Key: Inspector Group
+          Value: test-ubuntu
+
+  TestUbuntuInspectorAssessmentTarget:
+    Type: "AWS::Inspector::AssessmentTarget"
+    Properties:
+      ResourceGroupArn: !GetAtt TestUbuntuInspectorTargetGroup.Arn
+
+  TestUbuntuInspectorAssessmentTemplate:
+    Type: "AWS::Inspector::AssessmentTemplate"
+    Properties:
+      AssessmentTargetArn: !GetAtt TestUbuntuInspectorAssessmentTarget.Arn
+      DurationInSeconds: !Ref InspectorAssessmentDurationParam
+      # AssessmentTemplateName:
+      RulesPackageArns:
+        # Common Vulnerabilities and Exposures
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+        # Security Best Practices
+        # - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+      UserAttributesForFindings:
+        -
+          Key: Inspector Group
+          Value: test-ubuntu
+
+### CENTOS
+
+  TestCentosInspectorTargetGroup:
+    Type: "AWS::Inspector::ResourceGroup"
+    Properties:
+      ResourceGroupTags:
+        - Key: Inspector Group
+          Value: test-centos
+
+  TestCentosInspectorAssessmentTarget:
+    Type: "AWS::Inspector::AssessmentTarget"
+    Properties:
+      ResourceGroupArn: !GetAtt TestCentosInspectorTargetGroup.Arn
+
+  TestCentosInspectorAssessmentTemplate:
+    Type: "AWS::Inspector::AssessmentTemplate"
+    Properties:
+      AssessmentTargetArn: !GetAtt TestCentosInspectorAssessmentTarget.Arn
+      DurationInSeconds: !Ref InspectorAssessmentDurationParam
+      # AssessmentTemplateName:
+      RulesPackageArns:
+        # Common Vulnerabilities and Exposures
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+        # Security Best Practices
+        # - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+      UserAttributesForFindings:
+        -
+          Key: Inspector Group
+          Value: test-centos
+
+###
+
+  TestInspectorSchedule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description:  Test Inspector on test targets"
+      ScheduleExpression: rate(1 day)
+      State: DISABLED
+      Targets:
+        -
+          Arn: !GetAtt TestAmazonInspectorAssessmentTemplate.Arn
+          Id: default-inspector-assessment-amazon
+          RoleArn: !GetAtt TestInspectorAssessmentRole.Arn
+        -
+          Arn: !GetAtt TestRHELInspectorAssessmentTemplate.Arn
+          Id: default-inspector-assessment-rhel
+          RoleArn: !GetAtt TestInspectorAssessmentRole.Arn
+        -
+          Arn: !GetAtt TestCentosInspectorAssessmentTemplate.Arn
+          Id: default-inspector-assessment-centos
+          RoleArn: !GetAtt TestInspectorAssessmentRole.Arn
+        -
+          Arn: !GetAtt TestUbuntuInspectorAssessmentTemplate.Arn
+          Id: default-inspector-assessment-ubuntu
+          RoleArn: !GetAtt TestInspectorAssessmentRole.Arn
+
+  TestInspectorAssessmentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      # RoleName: inspector-assessment-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+                Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        -
+          PolicyName: run-inspector-assessments
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - inspector:StartAssessmentRun
+                Resource: '*'
+
+  TestInstancesPatchAssociation:
+    Type: "AWS::SSM::Association"
+    Properties:
+      # AssociationName: String
+      # DocumentVersion: String
+      # InstanceId: String
+      Name: !Ref PatchAndRemoveKernelsSSMDoc
+      OutputLocation:
+        S3Location:
+          OutputS3BucketName: !Ref LinuxPatchingLoggingS3Bucket
+          OutputS3KeyPrefix: test/
+      # Parameters:
+      #   String:
+      #     - String
+      ScheduleExpression: rate(1 day)
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - test-ubuntu
+            - test-amazon
+            - test-rhel
+            - test-centos
+
+  PatchAndRemoveKernelsSSMDoc:
+    Type: "AWS::SSM::Document"
+    Properties:
+      DocumentType: Command
+      Content:
+        schemaVersion: '2.2'
+        description: "Remove old Linux kernels so Inspector won't trip on them"
+        parameters: {}
+        mainSteps:
+        - action: aws:runDocument
+          name: InspectorAgent
+          inputs:
+            documentType: SSMDocument
+            documentPath: AmazonInspector-ManageAWSAgent
+            documentParameters:
+              Operation: Install
+        - action: aws:runDocument
+          name: PatchBaseline
+          inputs:
+            documentType: SSMDocument
+            documentPath: AWS-RunPatchBaseline
+            documentParameters:
+              Operation: !Ref PatchBaselineActionParam
+        - action: aws:runShellScript
+          name: removeOldKernels
+          precondition:
+            StringEquals:
+              - platformType
+              - Linux
+          inputs:
+            workingDirectory: /tmp
+            timeoutSeconds: 300
+            runCommand:
+              - "#!/bin/bash"
+              - if [ -n "$(command -v yum)" ] ; then
+              -   echo Using yum
+              -   if [ -z "$(command -v package-cleanup)" ] ; then
+              -     echo Installing package-cleanup
+              -     yum install -y yum-utils
+              -   fi
+              -   uname -r
+              -   echo Kernels before cleanup
+              -   rpm -qa kernel
+              -   package-cleanup --oldkernels --count 1 -y
+              -   echo Kernels after cleanup
+              -   rpm -qa kernel
+              - elif [ -n "$(command -v apt-get)" ] ; then
+              -   echo Using apt-get
+              -   echo Kernels before cleanup
+              -   dpkg --list | grep linux-image
+              -   apt autoremove --purge
+              -   echo Kernels after cleanup
+              -   dpkg --list | grep linux-image
+              - else
+              -   echo Not using yum or apt-get
+              -   echo Unsupported Linux distribution
+              -   exit 1
+              - fi
+
+  TestInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      # Policies:
+      #   - Policies
+      # RoleName: String
+
+  TestInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      # Path: String
+      Roles:
+        - !Ref TestInstanceRole
+      # InstanceProfileName: String
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: security group for patching test instances
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        Description: all 10-space
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: tcp
+        Description: all 10-space
+        FromPort: 3389
+        ToPort: 3389
+        CidrIp: 10.0.0.0/8
+      Tags:
+        -
+          Key: Name
+          Value: patching-test-sg
+        -
+          Key: Application
+          Value: sandbox
+        -
+          Key: Environment
+          Value: dev
+      VpcId: !Ref VPCParam
+
+  TestLaunchTemplate:
+    Type: "AWS::EC2::LaunchTemplate"
+    Properties:
+      # LaunchTemplateName: patching-test-instance-template
+      LaunchTemplateData:
+        # SecurityGroups:
+        #   - String
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Application
+                Value: sandbox
+              - Key: Environment
+                Value: dev
+              - Key: lifecycle-policy
+                Value: !Sub "limit-stop:${LimitHoursParam}"
+              - Key: Patch Group
+                Value: cu-cit-cloud-team-patching
+          - ResourceType: volume
+            Tags:
+              - Key: Application
+                Value: sandbox
+              - Key: Environment
+                Value: dev
+        # UserData: String
+        # InstanceInitiatedShutdownBehavior: String
+        # BlockDeviceMappings:
+        #   - BlockDeviceMapping
+        IamInstanceProfile:
+          Arn: !GetAtt TestInstanceProfile.Arn
+          # Name: String
+        # KernelId: String
+        SecurityGroupIds:
+          - !Ref InstanceSecurityGroup
+        # EbsOptimized: Boolean
+        KeyName: !Ref KeyPairParam
+        # DisableApiTermination: Boolean
+        # ElasticGpuSpecifications:
+        #   - ElasticGpuSpecification
+        # Placement: Placement
+        # InstanceMarketOptions: InstanceMarketOptions
+        # NetworkInterfaces:
+        #   - NetworkInterface
+        # ImageId: String
+        InstanceType: t2.micro
+        # RamDiskId: String
+        # Monitoring: Monitoring
+        # CreditSpecification: CreditSpecification
+
+  EC2RHEL7:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "RHEL7" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-RHEL7
+        - Key: Inspector Group
+          Value: test-rhel
+        - Key: Maintenance Group
+          Value: test-rhel
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          systemctl enable amazon-ssm-agent
+          systemctl start amazon-ssm-agent
+
+  # EC2RHEL6:
+  #   Type: AWS::EC2::Instance
+  #   Properties:
+  #     ImageId: !FindInMap [ MapOSParams, AMIParam, "RHEL6" ]
+  #     LaunchTemplate:
+  #       LaunchTemplateId: !Ref TestLaunchTemplate
+  #       # LaunchTemplateName: String
+  #       Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+  #     SubnetId: !Ref SubnetParam
+  #     Tags:
+  #       - Key: Name
+  #         Value: patching-test-RHEL6
+          # - Key: Inspector Group
+          #   Value: test-rhel
+          # - Key: Maintenance Group
+          #   Value: test-rhel
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash -xe
+  #         yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+  #         systemctl enable amazon-ssm-agent
+  #         systemctl start amazon-ssm-agent
+
+  # EC2Centos6:
+  #   Type: AWS::EC2::Instance
+  #   Properties:
+  #     ImageId: !FindInMap [ MapOSParams, AMIParam, "Centos6" ]
+  #     LaunchTemplate:
+  #       LaunchTemplateId: !Ref TestLaunchTemplate
+  #       # LaunchTemplateName: String
+  #       Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+  #     SubnetId: !Ref SubnetParam
+  #     Tags:
+  #       - Key: Name
+  #         Value: patching-test-Centos6
+          # - Key: Inspector Group
+          #   Value: test-centos
+          # - Key: Maintenance Group
+          #   Value: test-centos
+  #     UserData:
+  #       # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash -xe
+  #         cd /tmp
+  #         sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+  #         sudo start amazon-ssm-agent
+
+  EC2Centos7:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Centos7" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Centos7
+        - Key: Inspector Group
+          Value: test-centos
+        - Key: Maintenance Group
+          Value: test-centos
+      UserData:
+        # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          cd /tmp
+          sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          sudo start amazon-ssm-agent
+
+  EC2AmazonLinux:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "AmazonLinux" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-AmazonLinux
+        - Key: Inspector Group
+          Value: test-amazon
+        - Key: Maintenance Group
+          Value: test-amazon
+      UserData:
+        # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          cd /tmp
+          sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          sudo start amazon-ssm-agent
+
+  EC2AmazonLunuxECS:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "AmazonLinuxECS" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-AmazonLinuxECS
+        - Key: Inspector Group
+          Value: test-amazon
+        - Key: Maintenance Group
+          Value: test-amazon
+      UserData:
+        # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          cd /tmp
+          sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          sudo start amazon-ssm-agent
+
+  EC2AmazonLinux2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "AmazonLinux2" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-AmazonLinux2
+        - Key: Inspector Group
+          Value: test-amazon
+        - Key: Maintenance Group
+          Value: test-amazon
+
+  EC2Ubuntu1804:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Ubuntu1804" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Ubuntu1804
+        - Key: Inspector Group
+          Value: test-ubuntu
+        - Key: Maintenance Group
+          Value: test-ubuntu
+      UserData:
+        # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          sudo snap install amazon-ssm-agent --classic
+
+  EC2Ubuntu1604:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Ubuntu1604" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Ubuntu1604
+        - Key: Inspector Group
+          Value: test-ubuntu
+        - Key: Maintenance Group
+          Value: test-ubuntu
+      UserData:
+        # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          mkdir /tmp/ssm
+          cd /tmp/ssm
+          wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+          sudo dpkg -i amazon-ssm-agent.deb
+          sudo systemctl enable amazon-ssm-agent
+
+  EC2Ubuntu1404:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Ubuntu1404" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Ubuntu1404
+        - Key: Inspector Group
+          Value: test-ubuntu
+        - Key: Maintenance Group
+          Value: linux-ubuntu
+      UserData:
+        # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          mkdir /tmp/ssm
+          cd /tmp/ssm
+          wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+          sudo dpkg -i amazon-ssm-agent.deb
+          sudo start amazon-ssm-agent
