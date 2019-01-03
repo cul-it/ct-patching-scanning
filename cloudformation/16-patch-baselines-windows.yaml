@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create custom patch baselines so that Inspector CVE scans will be happy
+
+Parameters:
+
+  PatchApprovalDelayParam:
+    Default: 7
+    Description: How many days to delay before approving patches?
+    Type: Number
+
+Resources:
+
+  WindowsPatchBaseline:
+    Type: "AWS::SSM::PatchBaseline"
+    Properties:
+      Name: cu-cit-cloud-team-patching-Windows
+      # Options: WINDOWS, AMAZON_LINUX, AMAZON_LINUX_2, UBUNTU, REDHAT_ENTERPRISE_LINUX, SUSE, and CENTOS
+      OperatingSystem: WINDOWS
+      Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
+      PatchGroups:
+        - cu-cit-cloud-team-patching
+      ApprovalRules:
+        PatchRules:
+          - PatchFilterGroup:
+              # See https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PatchFilter.html
+              # PRODUCT | CLASSIFICATION | MSRC_SEVERITY | PATCH_ID | SECTION | PRIORITY | SEVERITY
+              PatchFilters:
+                - Key: PRODUCT
+                  Values:
+                    - "*"
+                - Key: CLASSIFICATION
+                  Values:
+                    - CriticalUpdates
+                    - SecurityUpdates
+                - Key: MSRC_SEVERITY
+                  Values:
+                    - Critical
+                    - Important
+            ApproveAfterDays: !Ref PatchApprovalDelayParam
+            # ComplianceLevel: String
+            # EnableNonSecurity: Boolean
+      # ApprovedPatches:
+      #   - String
+      ApprovedPatchesComplianceLevel: CRITICAL
+      # ApprovedPatchesEnableNonSecurity: false
+      # RejectedPatches:
+      #   - String
+      # RejectedPatchesAction:
+      #   - String
+      # GlobalFilters:
+      #   PatchFilterGroup
+      # Sources : PatchSource
