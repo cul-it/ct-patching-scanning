@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# A script to remove old linux kernels from a yum-based and apt-get-based linux distros.
+
 # set -e
 set -x
 
@@ -15,5 +17,3 @@ elif [ -n "$(command -v apt-get)" ] ; then
 else
   echo Not using yum or apt-get
 fi
-
-# aws ssm send-command --document-name "pea1-test-RemoveOldKernelsSSMDoc-1UIKWDA68YEUT" --document-version "\$DEFAULT" --targets "Key=instanceids,Values=i-0e57245de458ce68b" --parameters '{}' --timeout-seconds 600 --max-concurrency "50" --max-errors "0" --output-s3-bucket-name "cu-cs-sandbox-patching-logs" --output-s3-key-prefix "pea1/" --region us-east-1

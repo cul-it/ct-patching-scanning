@@ -4,6 +4,12 @@
 
 Creates an S3 bucket with lifecycle (expiration) policy to hold output from scanning and patching tasks
 
+## 15-patch-baselines.yaml
+
+Creates patch baselines for Windows and several linux flavors.
+
+Set "Patch Group" = "cu-cit-cloud-team-patching" on instances which should use these patch baselines.
+
 ## 20-patching.yaml
 
 Creates Systems Manager Maintenance Windows, Tasks, etc. to implement a basic patching and patch scanning process.
