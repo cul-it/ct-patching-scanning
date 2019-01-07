@@ -5,7 +5,7 @@ Description: >
 Parameters:
 
   PatchApprovalDelayParam:
-    Default: 0
+    Default: 7
     Description: How many days to delay before approving patches?
     Type: Number
 
@@ -20,32 +20,29 @@ Resources:
       Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
       PatchGroups:
         - cu-cit-cloud-team-patching
+      GlobalFilters:
+        PatchFilters:
+          - Key: PRODUCT
+            Values:
+              - "*"
       ApprovalRules:
         PatchRules:
           - PatchFilterGroup:
-              # See https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PatchFilter.html
-              # PRODUCT | CLASSIFICATION | MSRC_SEVERITY | PATCH_ID | SECTION | PRIORITY | SEVERITY
               PatchFilters:
-                # - Key: PRODUCT
-                #   Values:
-                #     - "*"
                 - Key: CLASSIFICATION
                   Values:
                     - Security
                     - Bugfix
             ApproveAfterDays: !Ref PatchApprovalDelayParam
-            # ComplianceLevel: String
-            # EnableNonSecurity: Boolean
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: false
       # ApprovedPatches:
       #   - String
-      # ApprovedPatchesComplianceLevel: CRITICAL
+      ApprovedPatchesComplianceLevel: UNSPECIFIED
       # ApprovedPatchesEnableNonSecurity: false
       # RejectedPatches:
       #   - String
-      # RejectedPatchesAction:
-      #   - String
-      # GlobalFilters:
-      #   PatchFilterGroup
+      RejectedPatchesAction: ALLOW_AS_DEPENDENCY
       # Sources : PatchSource
 
   AmazonLinux2PatchBaseline:
@@ -57,128 +54,39 @@ Resources:
       Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
       PatchGroups:
         - cu-cit-cloud-team-patching
+      GlobalFilters:
+        PatchFilters:
+          - Key: PRODUCT
+            Values:
+              - "*"
       ApprovalRules:
         PatchRules:
           - PatchFilterGroup:
-              # See https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PatchFilter.html
-              # PRODUCT | CLASSIFICATION | MSRC_SEVERITY | PATCH_ID | SECTION | PRIORITY | SEVERITY
               PatchFilters:
-                # - Key: PRODUCT
-                #   Values:
-                #     - "*"
                 - Key: CLASSIFICATION
                   Values:
                     - Security
                     - Bugfix
             ApproveAfterDays: !Ref PatchApprovalDelayParam
-            # ComplianceLevel: String
-            # EnableNonSecurity: Boolean
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: false
       # ApprovedPatches:
       #   - String
-      # ApprovedPatchesComplianceLevel: CRITICAL
-      # ApprovedPatchesEnableNonSecurity: false
+      ApprovedPatchesComplianceLevel: UNSPECIFIED
+      ApprovedPatchesEnableNonSecurity: false
       # RejectedPatches:
       #   - String
-      # RejectedPatchesAction:
-      #   - String
+      RejectedPatchesAction: ALLOW_AS_DEPENDENCY
       # GlobalFilters:
       #   PatchFilterGroup
       # Sources : PatchSource
 
-  # CentosPatchBaseline:
-  #   Type: "AWS::SSM::PatchBaseline"
-  #   Properties:
-  #     Name: cu-cit-cloud-team-patching-Centos
-  #     # Options: WINDOWS, AMAZON_LINUX, AMAZON_LINUX_2, UBUNTU, REDHAT_ENTERPRISE_LINUX, SUSE, and CENTOS
-  #     OperatingSystem: CENTOS
-  #     Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
-  #     PatchGroups:
-  #       - cu-cit-cloud-team-patching
-  #     ApprovalRules:
-  #       PatchRules:
-  #         - PatchFilterGroup:
-  #             # See https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PatchFilter.html
-  #             # PRODUCT | CLASSIFICATION | MSRC_SEVERITY | PATCH_ID | SECTION | PRIORITY | SEVERITY
-  #             PatchFilters:
-  #               # - Key: PRODUCT
-  #               #   Values:
-  #               #     - "*"
-  #               - Key: CLASSIFICATION
-  #                 Values:
-  #                   - Security
-  #                   - Bugfix
-  #                   - Recommended
-  #                   - Enhancement
-  #                   - Newpackage
-  #           ApproveAfterDays: !Ref PatchApprovalDelayParam
-  #           # ComplianceLevel: String
-  #           EnableNonSecurity: true # this matches the AWS SSM default baseline for CentOS
-  #     # ApprovedPatches:
-  #     #   - String
-  #     # ApprovedPatchesComplianceLevel: CRITICAL
-  #     # ApprovedPatchesEnableNonSecurity: false
-  #     # RejectedPatches:
-  #     #   - String
-  #     # RejectedPatchesAction:
-  #     #   - String
-  #     # GlobalFilters:
-  #     #   PatchFilterGroup
-  #     # Sources : PatchSource
-
-  RHELPatchBaseline:
+  CentosPatchBaseline:
     Type: "AWS::SSM::PatchBaseline"
     Properties:
-      Name: cu-cit-cloud-team-patching-RHEL
+      Name: cu-cit-cloud-team-patching-Centos
       # Options: WINDOWS, AMAZON_LINUX, AMAZON_LINUX_2, UBUNTU, REDHAT_ENTERPRISE_LINUX, SUSE, and CENTOS
-      OperatingSystem: REDHAT_ENTERPRISE_LINUX
-      Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
-      PatchGroups:
-        - cu-cit-cloud-team-patching
-      ApprovalRules:
-        PatchRules:
-          - PatchFilterGroup:
-              # See https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PatchFilter.html
-              # PRODUCT | CLASSIFICATION | MSRC_SEVERITY | PATCH_ID | SECTION | PRIORITY | SEVERITY
-              PatchFilters:
-                # - Key: PRODUCT
-                #   Values:
-                #     - "*"
-                - Key: CLASSIFICATION
-                  Values:
-                    - Security
-            ApproveAfterDays: !Ref PatchApprovalDelayParam
-            # ComplianceLevel: String
-            # EnableNonSecurity: Boolean
-          - PatchFilterGroup:
-              # See https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_PatchFilter.html
-              # PRODUCT | CLASSIFICATION | MSRC_SEVERITY | PATCH_ID | SECTION | PRIORITY | SEVERITY
-              PatchFilters:
-                # - Key: PRODUCT
-                #   Values:
-                #     - "*"
-                - Key: CLASSIFICATION
-                  Values:
-                    - Bugfix
-            ApproveAfterDays: !Ref PatchApprovalDelayParam
-            # ComplianceLevel: String
-            # EnableNonSecurity: Boolean
-      # ApprovedPatches:
-      #   - String
-      # ApprovedPatchesComplianceLevel: CRITICAL
-      # ApprovedPatchesEnableNonSecurity: false
-      # RejectedPatches:
-      #   - String
-      # RejectedPatchesAction:
-      #   - String
-      # GlobalFilters:
-      #   PatchFilterGroup
-
-  UbuntuPatchBaseline:
-    Type: "AWS::SSM::PatchBaseline"
-    Properties:
-      Name: cu-cit-cloud-team-patching-Ubuntu
-      # Options: WINDOWS, AMAZON_LINUX, AMAZON_LINUX_2, UBUNTU, REDHAT_ENTERPRISE_LINUX, SUSE, and CENTOS
-      OperatingSystem: UBUNTU
+      OperatingSystem: CENTOS
       Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
       PatchGroups:
         - cu-cit-cloud-team-patching
@@ -191,26 +99,136 @@ Resources:
                 - Key: PRODUCT
                   Values:
                     - "*"
+            ApproveAfterDays: !Ref PatchApprovalDelayParam
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: true
+      # ApprovedPatches:
+      #   - String
+      ApprovedPatchesComplianceLevel: UNSPECIFIED
+      ApprovedPatchesEnableNonSecurity: false
+      # RejectedPatches:
+      #   - String
+      RejectedPatchesAction: ALLOW_AS_DEPENDENCY
+      # GlobalFilters:
+      #   PatchFilterGroup
+      # Sources : PatchSource
+
+  RHELPatchBaseline:
+    Type: "AWS::SSM::PatchBaseline"
+    Properties:
+      Name: cu-cit-cloud-team-patching-RHEL
+      # Options: WINDOWS, AMAZON_LINUX, AMAZON_LINUX_2, UBUNTU, REDHAT_ENTERPRISE_LINUX, SUSE, and CENTOS
+      OperatingSystem: REDHAT_ENTERPRISE_LINUX
+      Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
+      PatchGroups:
+        - cu-cit-cloud-team-patching
+      GlobalFilters:
+        PatchFilters:
+          - Key: PRODUCT
+            Values:
+              - "*"
+      ApprovalRules:
+        PatchRules:
+          - PatchFilterGroup:
+              PatchFilters:
+                - Key: CLASSIFICATION
+                  Values:
+                    - Security
+                # This filter is in the AWS default for RHEL
+                # - Key: SEVERITY
+                #   Values:
+                #     - Critical
+                #     - Important
+            ApproveAfterDays: !Ref PatchApprovalDelayParam
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: false
+          - PatchFilterGroup:
+              PatchFilters:
+                - Key: CLASSIFICATION
+                  Values:
+                    - Bugfix
+            ApproveAfterDays: !Ref PatchApprovalDelayParam
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: false
+      # ApprovedPatches:
+      #   - String
+      ApprovedPatchesComplianceLevel: UNSPECIFIED
+      ApprovedPatchesEnableNonSecurity: false
+      # RejectedPatches:
+      #   - String
+      RejectedPatchesAction: ALLOW_AS_DEPENDENCY
+
+
+  UbuntuPatchBaseline:
+    Type: "AWS::SSM::PatchBaseline"
+    Properties:
+      Name: cu-cit-cloud-team-patching-Ubuntu
+      OperatingSystem: UBUNTU
+      Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
+      PatchGroups:
+        - cu-cit-cloud-team-patching
+      GlobalFilters:
+        PatchFilters:
+          - Key: PRODUCT
+            Values:
+              - "*"
+      ApprovalRules:
+        PatchRules:
+          - PatchFilterGroup:
+              PatchFilters:
                 - Key: PRIORITY
                   Values:
+                    - Required
                     - Required
                     - Important
                     - Standard
                     - Optional
                     - Extra
-                - Key: SECTION
-                  Values:
-                    - "*"
             ApproveAfterDays: !Ref PatchApprovalDelayParam
-            # ComplianceLevel: String
-            # EnableNonSecurity: Boolean
-      # ApprovedPatches:
-      #   - String
-      # ApprovedPatchesComplianceLevel: CRITICAL
-      # ApprovedPatchesEnableNonSecurity: false
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: false
+      ApprovedPatchesComplianceLevel: UNSPECIFIED
+      ApprovedPatchesEnableNonSecurity: false
       # RejectedPatches:
       #   - String
-      # RejectedPatchesAction:
+      RejectedPatchesAction: ALLOW_AS_DEPENDENCY
+
+  WindowsPatchBaseline:
+    Type: "AWS::SSM::PatchBaseline"
+    Properties:
+      Name: cu-cit-cloud-team-patching-Windows
+      # Options: WINDOWS, AMAZON_LINUX, AMAZON_LINUX_2, UBUNTU, REDHAT_ENTERPRISE_LINUX, SUSE, and CENTOS
+      OperatingSystem: WINDOWS
+      Description: "Patch baseline for use with https://github.com/CU-CommunityApps/ct-patching-scanning"
+      PatchGroups:
+        - cu-cit-cloud-team-patching
+      GlobalFilters:
+        PatchFilters:
+          - Key: PRODUCT
+            Values:
+              - "*"
+      ApprovalRules:
+        PatchRules:
+          - PatchFilterGroup:
+              PatchFilters:
+                - Key: CLASSIFICATION
+                  Values:
+                    - CriticalUpdates
+                    - SecurityUpdates
+                - Key: MSRC_SEVERITY
+                  Values:
+                    - Critical
+                    - Important
+            ApproveAfterDays: !Ref PatchApprovalDelayParam
+            ComplianceLevel: UNSPECIFIED
+            EnableNonSecurity: false
+      # ApprovedPatches:
       #   - String
+      ApprovedPatchesComplianceLevel: UNSPECIFIED
+      ApprovedPatchesEnableNonSecurity: false
+      # RejectedPatches:
+      #   - String
+      RejectedPatchesAction: ALLOW_AS_DEPENDENCY
       # GlobalFilters:
       #   PatchFilterGroup
+      # Sources : PatchSource
