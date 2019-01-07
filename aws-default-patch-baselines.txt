@@ -1,0 +1,408 @@
+============================================================================
+UBUNTU
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-0c7e89f711c3095f4",
+    "Name": "AWS-UbuntuDefaultPatchBaseline",
+    "OperatingSystem": "UBUNTU",
+    "GlobalFilters": {
+        "PatchFilters": [
+            {
+                "Key": "PRODUCT",
+                "Values": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "PRIORITY",
+                            "Values": [
+                                "Required",
+                                "Important",
+                                "Standard",
+                                "Optional",
+                                "Extra"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1525194800.068,
+    "ModifiedDate": 1525194800.068,
+    "Description": "Default Patch Baseline for Ubuntu Provided by AWS.",
+    "Sources": []
+}
+============================================================================
+CENTOS
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-03e3f588eec25344c",
+    "Name": "AWS-CentOSDefaultPatchBaseline",
+    "OperatingSystem": "CENTOS",
+    "GlobalFilters": {
+        "PatchFilters": []
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "PRODUCT",
+                            "Values": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": true
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1522345092.515,
+    "ModifiedDate": 1522345092.515,
+    "Description": "Default Patch Baseline for CentOS Provided by AWS.",
+    "Sources": []
+}
+============================================================================
+RHEL
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-0cbb3a633de00f07c",
+    "Name": "AWS-RedHatDefaultPatchBaseline",
+    "OperatingSystem": "REDHAT_ENTERPRISE_LINUX",
+    "GlobalFilters": {
+        "PatchFilters": [
+            {
+                "Key": "PRODUCT",
+                "Values": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Security"
+                            ]
+                        },
+                        {
+                            "Key": "SEVERITY",
+                            "Values": [
+                                "Critical",
+                                "Important"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            },
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Bugfix"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1525194800.068,
+    "ModifiedDate": 1525194800.068,
+    "Description": "Default Patch Baseline for Redhat Enterprise Linux Provided by AWS.",
+    "Sources": []
+}
+============================================================================
+Amazon Linux
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-0c10e657807c7a700",
+    "Name": "AWS-AmazonLinuxDefaultPatchBaseline",
+    "OperatingSystem": "AMAZON_LINUX",
+    "GlobalFilters": {
+        "PatchFilters": [
+            {
+                "Key": "PRODUCT",
+                "Values": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Security"
+                            ]
+                        },
+                        {
+                            "Key": "SEVERITY",
+                            "Values": [
+                                "Critical",
+                                "Important"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            },
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Bugfix"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1525194800.068,
+    "ModifiedDate": 1525194800.068,
+    "Description": "Default Patch Baseline for Amazon Linux Provided by AWS.",
+    "Sources": []
+}
+============================================================================
+Amazon Linux 2
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-0be8c61cde3be63f3",
+    "Name": "AWS-AmazonLinux2DefaultPatchBaseline",
+    "OperatingSystem": "AMAZON_LINUX_2",
+    "GlobalFilters": {
+        "PatchFilters": [
+            {
+                "Key": "PRODUCT",
+                "Values": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Security"
+                            ]
+                        },
+                        {
+                            "Key": "SEVERITY",
+                            "Values": [
+                                "Critical",
+                                "Important"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            },
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Bugfix"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1529573225.252,
+    "ModifiedDate": 1529573225.252,
+    "Description": "Default Patch Baseline for Amazon Linux 2 Provided by AWS.",
+    "Sources": []
+}
+============================================================================
+SUSE
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-07d8884178197b66b",
+    "Name": "AWS-SuseDefaultPatchBaseline",
+    "OperatingSystem": "SUSE",
+    "GlobalFilters": {
+        "PatchFilters": [
+            {
+                "Key": "PRODUCT",
+                "Values": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "Security"
+                            ]
+                        },
+                        {
+                            "Key": "SEVERITY",
+                            "Values": [
+                                "Critical",
+                                "Important"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1525194800.069,
+    "ModifiedDate": 1525194800.069,
+    "Description": "Default Patch Baseline for Suse Provided by AWS.",
+    "Sources": []
+}
+============================================================================
+Windows
+============================================================================
+{
+    "BaselineId": "arn:aws:ssm:us-east-1:075727635805:patchbaseline/pb-09ca3fb51f0412ec3",
+    "Name": "AWS-DefaultPatchBaseline",
+    "OperatingSystem": "WINDOWS",
+    "GlobalFilters": {
+        "PatchFilters": [
+            {
+                "Key": "PRODUCT",
+                "Values": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "ApprovalRules": {
+        "PatchRules": [
+            {
+                "PatchFilterGroup": {
+                    "PatchFilters": [
+                        {
+                            "Key": "CLASSIFICATION",
+                            "Values": [
+                                "CriticalUpdates",
+                                "SecurityUpdates"
+                            ]
+                        },
+                        {
+                            "Key": "MSRC_SEVERITY",
+                            "Values": [
+                                "Critical",
+                                "Important"
+                            ]
+                        }
+                    ]
+                },
+                "ComplianceLevel": "UNSPECIFIED",
+                "ApproveAfterDays": 7,
+                "EnableNonSecurity": false
+            }
+        ]
+    },
+    "ApprovedPatches": [],
+    "ApprovedPatchesComplianceLevel": "UNSPECIFIED",
+    "ApprovedPatchesEnableNonSecurity": false,
+    "RejectedPatches": [],
+    "RejectedPatchesAction": "ALLOW_AS_DEPENDENCY",
+    "PatchGroups": [],
+    "CreatedDate": 1525194800.068,
+    "ModifiedDate": 1525194800.068,
+    "Description": "Default Patch Baseline Provided by AWS.",
+    "Sources": []
+}
+OIT-PEA1-ML:ct-patching-scanning pea1$

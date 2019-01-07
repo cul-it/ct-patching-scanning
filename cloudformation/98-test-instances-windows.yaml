@@ -1,0 +1,422 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create a set of EC2 instances to use for testing SSM documents
+
+Mappings:
+
+  MapOSParams:
+    AMIParam:
+      # Windows 2016
+      # NO LONGER AVAILABLE ami-75bb8f0a	x86_64	2018-07-11T02:02:51.000Z	Windows_Server-2016-English-Core-Base-2018.07.11	Microsoft Windows Server 2016 Core Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # NO LONGER AVAILABLE ami-0a3bcef4f4fce1541	x86_64	2018-08-15T01:45:10.000Z	Windows_Server-2016-English-Core-Base-2018.08.15	Microsoft Windows Server 2016 Core Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0e60df717fb6cce0e	x86_64	2018-09-16T20:39:22.000Z	Windows_Server-2016-English-Core-Base-2018.09.15	Microsoft Windows Server 2016 Core Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-02d09b9efbbe01199	x86_64	2018-10-14T06:00:42.000Z	Windows_Server-2016-English-Core-Base-2018.10.14	Microsoft Windows Server 2016 Core Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-059d5598cdc8245af	x86_64	2018-11-19T04:52:59.000Z	Windows_Server-2016-English-Core-Base-2018.11.19	Microsoft Windows Server 2016 Core Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-064fdbce03e29732c	x86_64	2018-11-27T15:53:07.000Z	Windows_Server-2016-English-Core-Base-2018.11.28	Microsoft Windows Server 2016 Core Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      Windows2016Base: ami-0e60df717fb6cce0e
+
+      # Windows 2012R2
+      # NO LONGER AVAILABLE ami-60093e1f	x86_64	2018-07-11T07:22:40.000Z	Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.07.11	Microsoft Windows Server 2012 R2 RTM 64-bit Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # NO LONGER AVAILABLE ami-07355e1e938a6b6cb	x86_64	2018-08-15T02:01:43.000Z	Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.08.15	Microsoft Windows Server 2012 R2 RTM 64-bit Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-04b06bdb58cae787d	x86_64	2018-09-16T23:12:15.000Z	Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.09.15	Microsoft Windows Server 2012 R2 RTM 64-bit Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0fba87d7f8c8744d4	x86_64	2018-10-14T06:07:27.000Z	Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.10.14	Microsoft Windows Server 2012 R2 RTM 64-bit Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0f7af6e605e2d2db5	x86_64	2018-11-19T05:21:14.000Z	Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.11.19	Microsoft Windows Server 2012 R2 RTM 64-bit Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-015e4abfa8bb28eae	x86_64	2018-11-27T16:44:53.000Z	Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.11.28	Microsoft Windows Server 2012 R2 RTM 64-bit Locale English AMI provided by Amazon	hvm	ebs	x86_64	available
+      Windows2012R2Base: ami-04b06bdb58cae787d
+
+      # Windows 2012
+      # NO LONGER AVAILABLE ami-462c1b39	x86_64	2018-07-11T06:26:51.000Z	Windows_Server-2012-RTM-English-64Bit-Base-2018.07.11	Microsoft Windows Server 2012 RTM 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # NO LONGER AVAILABLE ami-059ad621a0d2eb0d1	x86_64	2018-08-15T05:43:14.000Z	Windows_Server-2012-RTM-English-64Bit-Base-2018.08.15	Microsoft Windows Server 2012 RTM 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-05c2bf574678ef72a	x86_64	2018-09-17T01:00:21.000Z	Windows_Server-2012-RTM-English-64Bit-Base-2018.09.15	Microsoft Windows Server 2012 RTM 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0f764b6278b21abc8	x86_64	2018-10-14T05:27:07.000Z	Windows_Server-2012-RTM-English-64Bit-Base-2018.10.14	Microsoft Windows Server 2012 RTM 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-09f6881bf152f63dc	x86_64	2018-11-19T04:46:58.000Z	Windows_Server-2012-RTM-English-64Bit-Base-2018.11.19	Microsoft Windows Server 2012 RTM 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0db55841dd3b876a9	x86_64	2018-11-27T15:46:41.000Z	Windows_Server-2012-RTM-English-64Bit-Base-2018.11.28	Microsoft Windows Server 2012 RTM 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      Windows2012Base: ami-05c2bf574678ef72a
+
+      # Windows 2008R2
+      # NO LONGER AVAILABLE ami-a2bd89dd	x86_64	2018-07-11T02:14:19.000Z	Windows_Server-2008-R2_SP1-English-64Bit-Base-2018.07.11	Microsoft Windows Server 2008 R2 SP1 Datacenter 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # NO LONGER AVAILABLE ami-098be1db577d54f7e	x86_64	2018-08-15T01:22:25.000Z	Windows_Server-2008-R2_SP1-English-64Bit-Base-2018.08.15	Microsoft Windows Server 2008 R2 SP1 Datacenter 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-07138e4994095c6b6	x86_64	2018-09-18T00:26:17.000Z	Windows_Server-2008-R2_SP1-English-64Bit-Base-2018.09.15	Microsoft Windows Server 2008 R2 SP1 Datacenter 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0509af5ff9695a433	x86_64	2018-10-14T05:22:44.000Z	Windows_Server-2008-R2_SP1-English-64Bit-Base-2018.10.14	Microsoft Windows Server 2008 R2 SP1 Datacenter 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-0b0edaf56d92f715d	x86_64	2018-11-19T04:42:48.000Z	Windows_Server-2008-R2_SP1-English-64Bit-Base-2018.11.19	Microsoft Windows Server 2008 R2 SP1 Datacenter 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      # ami-06cb3e4014de9c9f4	x86_64	2018-11-27T15:45:33.000Z	Windows_Server-2008-R2_SP1-English-64Bit-Base-2018.11.28	Microsoft Windows Server 2008 R2 SP1 Datacenter 64-bit Locale English Base AMI provided by Amazon	hvm	ebs	x86_64	available
+      Windwos2008R2Base: ami-07138e4994095c6b6
+
+Parameters:
+
+  KeyPairParam:
+    Default: pea1
+    Description: Which keypair to use for instance access
+    Type: AWS::EC2::KeyPair::KeyName
+
+  VPCParam:
+    Default: vpc-71070114
+    Description: VPC in which to launch instances
+    Type: AWS::EC2::VPC::Id
+
+  SubnetParam:
+    Default: subnet-dd8519f6
+    Description: Subnet in which to launch instances
+    Type: AWS::EC2::Subnet::Id
+
+  LimitHoursParam:
+    Default: 1
+    Description: How many hours before limit-stop?
+    Type: Number
+
+  PatchBaselineActionParam:
+    Default: Install
+    Description: Scan or Install?
+    Type: String
+    AllowedValues:
+      - Scan
+      - Install
+
+  InspectorAssessmentDurationParam:
+    Default: 900
+    Description: Number of seconds Inspector should run its assessments; 3600 minimum recommended
+    Type: String
+
+Resources:
+
+  WindowsPatchingLoggingS3Bucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      # AccessControl: String
+      # BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
+      # CorsConfiguration:
+      #   CORS Configuration
+      LifecycleConfiguration:
+        Rules:
+          -
+            # ExpirationDate: String
+            ExpirationInDays: 7
+            Id: Expire7Days
+            # NoncurrentVersionExpirationInDays: Integer
+            # NoncurrentVersionTransition (deprecated):
+            #   NoncurrentVersionTransition type
+            # NoncurrentVersionTransitions:
+            #   - NoncurrentVersionTransition type
+            # Prefix: String
+            Status: Enabled
+            # Transition (deprecated):
+            #   Transition type
+            # Transitions:
+            #  -
+            #   StorageClass: GLACIER
+            #  TransitionDate: String
+            #   TransitionInDays: 30
+      # LoggingConfiguration:
+      #   Logging Configuration
+      # NotificationConfiguration:
+      #   Notification Configuration
+      # ReplicationConfiguration:
+      #   Replication Configuration
+      Tags:
+        - Key: Application
+          Value: sandbox
+        - Key: Environment
+          Value: dev
+        - Key: to-be-deleted
+          Value: now
+      # VersioningConfiguration:
+      #   Versioning Configuration
+      # WebsiteConfiguration:
+      #   Website Configuration Type
+
+  TestInspectorTargetGroup:
+    Type: "AWS::Inspector::ResourceGroup"
+    Properties:
+      ResourceGroupTags:
+        -
+          Key: Inspector Group
+          Value: test-windows
+
+  TestInspectorAssessmentTarget:
+    Type: "AWS::Inspector::AssessmentTarget"
+    Properties:
+      # AssessmentTargetName: Test Assessment Group Target
+      ResourceGroupArn: !GetAtt TestInspectorTargetGroup.Arn
+
+  TestWindowsInspectorAssessmentTemplate:
+    Type: "AWS::Inspector::AssessmentTemplate"
+    Properties:
+      AssessmentTargetArn: !GetAtt TestInspectorAssessmentTarget.Arn
+      DurationInSeconds: !Ref InspectorAssessmentDurationParam
+      # AssessmentTemplateName:
+      RulesPackageArns:
+        # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_rules-arns.html
+        # Common Vulnerabilities and Exposures
+        - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7
+        # Security Best Practices
+        # - arn:aws:inspector:us-east-1:316112463485:rulespackage/0-R01qwB5Q
+      # UserAttributesForFindings:
+      #   -
+      #     Key: Application
+      #     Value: !Ref ApplicationTagParam
+      #   -
+      #     Key: Environment
+      #     Value: !Ref EnvironmentParam
+
+  TestInspectorSchedule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description:  Test Inspector on test targets"
+      # EventPattern:
+      #   source:
+      #     - aws.ec2
+      #   detail-type:
+      #     - "EC2 Instance State-change Notification"
+      #   detail:
+      #     state: "running"
+      # Name: test-inspector-schedule
+      ScheduleExpression: rate(1 day)
+      State: DISABLED
+      Targets:
+        -
+          Arn: !GetAtt TestWindowsInspectorAssessmentTemplate.Arn
+          # EcsParameters:
+          #   EcsParameters
+          Id: default-inspector-assessment
+          # Input: String
+          # InputPath: String
+          # InputTransformer:
+          #   InputTransformer
+          # KinesisParameters:
+          #   KinesisParameters
+          RoleArn: !GetAtt TestInspectorAssessmentRole.Arn
+          # RunCommandParameters:
+          #   RunCommandParameters
+
+  TestInspectorAssessmentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      # RoleName: inspector-assessment-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+                Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        -
+          PolicyName: run-inspector-assessments
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - inspector:StartAssessmentRun
+                Resource: '*'
+
+  TestInstancesPatchAssociation:
+    Type: "AWS::SSM::Association"
+    Properties:
+      # AssociationName: String
+      # DocumentVersion: String
+      # InstanceId: String
+      Name: !Ref PatchAndRemoveKernelsSSMDoc
+      OutputLocation:
+        S3Location:
+          OutputS3BucketName: !Ref WindowsPatchingLoggingS3Bucket
+          OutputS3KeyPrefix: test/
+      # Parameters:
+      #   String:
+      #     - String
+      # ScheduleExpression: rate(1 day)
+      Targets:
+        -
+          Key: tag:Maintenance Group
+          Values:
+            - test-windows
+
+  PatchAndRemoveKernelsSSMDoc:
+    Type: "AWS::SSM::Document"
+    Properties:
+      DocumentType: Command
+      Content:
+        schemaVersion: '2.2'
+        description: "Remove old Linux kernels so Inspector won't trip on them"
+        parameters: {}
+        mainSteps:
+        - action: aws:runDocument
+          name: InspectorAgent
+          inputs:
+            documentType: SSMDocument
+            documentPath: AmazonInspector-ManageAWSAgent
+            documentParameters:
+              Operation: Install
+        - action: aws:runDocument
+          name: PatchBaseline
+          inputs:
+            documentType: SSMDocument
+            documentPath: AWS-RunPatchBaseline
+            documentParameters:
+              Operation: !Ref PatchBaselineActionParam
+
+  TestInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      # MaxSessionDuration: Integer
+      # Path: String
+      # PermissionsBoundary: String
+      # Policies:
+      #   - Policies
+      # RoleName: String
+
+  TestInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      # Path: String
+      Roles:
+        - !Ref TestInstanceRole
+      # InstanceProfileName: String
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: security group for patching test instances
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        Description: all 10-space
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: tcp
+        Description: all 10-space
+        FromPort: 3389
+        ToPort: 3389
+        CidrIp: 10.0.0.0/8
+      Tags:
+        -
+          Key: Name
+          Value: patching-test-windows-sg
+        -
+          Key: Application
+          Value: sandbox
+        -
+          Key: Environment
+          Value: dev
+      VpcId: !Ref VPCParam
+
+  TestLaunchTemplate:
+    Type: "AWS::EC2::LaunchTemplate"
+    Properties:
+      # LaunchTemplateName: patching-test-instance-template
+      LaunchTemplateData:
+        # SecurityGroups:
+        #   - String
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Application
+                Value: sandbox
+              - Key: Environment
+                Value: dev
+              - Key: Maintenance Group
+                Value: test-windows-XXX
+              - Key: Inspector Group
+                Value: test-windows
+              - Key: lifecycle-policy
+                Value: !Sub "limit-stop:${LimitHoursParam}"
+              - Key: Patch Group
+                Value: cu-cit-cloud-team-patching
+          - ResourceType: volume
+            Tags:
+              - Key: Application
+                Value: sandbox
+              - Key: Environment
+                Value: dev
+        # UserData: String
+        # InstanceInitiatedShutdownBehavior: String
+        # BlockDeviceMappings:
+        #   - BlockDeviceMapping
+        IamInstanceProfile:
+          Arn: !GetAtt TestInstanceProfile.Arn
+          # Name: String
+        # KernelId: String
+        SecurityGroupIds:
+          - !Ref InstanceSecurityGroup
+        # EbsOptimized: Boolean
+        KeyName: !Ref KeyPairParam
+        # DisableApiTermination: Boolean
+        # ElasticGpuSpecifications:
+        #   - ElasticGpuSpecification
+        # Placement: Placement
+        # InstanceMarketOptions: InstanceMarketOptions
+        # NetworkInterfaces:
+        #   - NetworkInterface
+        # ImageId: String
+        InstanceType: t2.small
+        # RamDiskId: String
+        Monitoring:
+          Enabled: true
+        # CreditSpecification: CreditSpecification
+
+  Windows2016Base:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Windows2016Base" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Windows2016Base
+
+  Windows2012R2Base:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Windows2012R2Base" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Windows2012R2Base
+
+  Windows2012Base:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Windows2012Base" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Windows2012Base
+
+  Windows2008Base:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [ MapOSParams, AMIParam, "Windwos2008R2Base" ]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref TestLaunchTemplate
+        # LaunchTemplateName: String
+        Version: !GetAtt TestLaunchTemplate.LatestVersionNumber
+      SubnetId: !Ref SubnetParam
+      Tags:
+        - Key: Name
+          Value: patching-test-Windows2008Base

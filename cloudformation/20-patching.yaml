@@ -55,6 +55,11 @@ Parameters:
       - Scan
       - Install
 
+  NotificationSNSArnParam:
+    Default: arn:aws:sns:us-east-1:123456789012:alert-me
+    Description: Arn of SNS topic where notifications about patching problems should be sent
+    Type: String
+
 Resources:
 
   SSMPatchingInstanceRole:
@@ -390,7 +395,7 @@ Resources:
           # DocumentHashType: String
           ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
           NotificationConfig:
-              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationArn: !Ref NotificationSNSArnParam
               NotificationEvents:
                   # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
                   - Success
@@ -435,7 +440,7 @@ Resources:
           # DocumentHashType: String
           ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
           NotificationConfig:
-              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationArn: !Ref NotificationSNSArnParam
               NotificationEvents:
                   # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
                   - Success
@@ -480,7 +485,7 @@ Resources:
           # DocumentHashType: String
           ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
           NotificationConfig:
-              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationArn: !Ref NotificationSNSArnParam
               NotificationEvents:
                   # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
                   - Success
@@ -525,7 +530,7 @@ Resources:
           # DocumentHashType: String
           ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
           NotificationConfig:
-              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationArn: !Ref NotificationSNSArnParam
               NotificationEvents:
                   # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
                   - Success
@@ -570,7 +575,7 @@ Resources:
           # DocumentHashType: String
           ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
           NotificationConfig:
-              NotificationArn: !Sub "arn:aws:sns:us-east-1:${AWS::AccountId}:alert-pea1"
+              NotificationArn: !Ref NotificationSNSArnParam
               NotificationEvents:
                   # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
                   - Success
