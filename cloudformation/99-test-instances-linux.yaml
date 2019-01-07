@@ -689,7 +689,7 @@ Resources:
         - Key: Inspector Group
           Value: test-ubuntu
         - Key: Maintenance Group
-          Value: linux-ubuntu
+          Value: test-ubuntu
       UserData:
         # Install SSM agent in case AMI is so old that it isn't already baked into the AMI
         Fn::Base64: !Sub |
