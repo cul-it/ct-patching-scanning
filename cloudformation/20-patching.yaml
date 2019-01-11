@@ -101,6 +101,7 @@ Resources:
       Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , weeklytasks ]
       Duration: 1
       Name: weekly-tasks-all
+      ScheduleTimezone: US/Eastern
 
   WeeklyScansMaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
@@ -111,6 +112,7 @@ Resources:
       Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , weeklyscans ]
       Duration: 1
       Name: weekly-scans-all
+      ScheduleTimezone: US/Eastern
 
   Default9x5MaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
@@ -121,6 +123,7 @@ Resources:
       Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 9x5default ]
       Duration: 1
       Name: 9x5-default
+      ScheduleTimezone: US/Eastern
 
   GroupA24x7MaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
@@ -131,6 +134,7 @@ Resources:
       Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 24x7a ]
       Duration: 1
       Name: 24x7-group-a
+      ScheduleTimezone: US/Eastern
 
   GroupB24x7MaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
@@ -141,6 +145,7 @@ Resources:
       Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 24x7b ]
       Duration: 1
       Name: 24x7-group-b
+      ScheduleTimezone: US/Eastern
 
   GroupC24x7MaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
@@ -151,6 +156,7 @@ Resources:
       Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 24x7c ]
       Duration: 1
       Name: 24x7-group-c
+      ScheduleTimezone: US/Eastern
 
 
   WeeklyTasksMaintenanceWindowTarget:
