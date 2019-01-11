@@ -7,29 +7,28 @@ Mappings:
   MapEnvironmentParams:
 
     NowCronSchedule:
-      24x7a: 'cron(0 50 12 ? * MON *)'
-      24x7b: 'cron(0 50 12 ? * MON *)'
-      24x7c: 'cron(0 50 12 ? * MON *)'
-      9x5default: 'cron(0 50 12 ? * MON *)'
-      weeklytasks: 'cron(0 35 12 ? * MON *)'
-      weeklyscans: 'cron(0 0 13 ? * MON *)'
+      24x7a: 'cron(0 15 10 ? * MON *)'
+      24x7b: 'cron(0 15 10 ? * MON *)'
+      24x7c: 'cron(0 15 10 ? * MON *)'
+      9x5default: 'cron(0 15 10 ? * MON *)'
+      weeklytasks: 'cron(0 0 10 ? * MON *)'
+      weeklyscans: 'cron(0 0 11 ? * MON *)'
 
     TestCronSchedule:
-      24x7a: 'cron(0 0 11 ? * MON *)'
-      24x7b: 'cron(0 0 11 ? * TUE *)'
-      24x7c: 'cron(0 0 11 ? * WED *)'
-      9x5default: 'cron(0 15 12 ? * MON *)'
-      weeklytasks: 'cron(0 5 12 ? * MON *)'
-      weeklyscans: 'cron(0 5 12 ? * WED *)'
+      24x7a: 'cron(0 0 7 ? * MON *)'
+      24x7b: 'cron(0 0 7 ? * TUE *)'
+      24x7c: 'cron(0 0 7 ? * WED *)'
+      9x5default: 'cron(0 15 8 ? * MON *)'
+      weeklytasks: 'cron(0 15 8 ? * MON *)'
+      weeklyscans: 'cron(0 15 8 ? * WED *)'
 
     ProdCronSchedule:
-      24x7a: 'cron(0 0 11 ? * TUE *)'
-      24x7b: 'cron(0 0 11 ? * WED *)'
-      24x7c: 'cron(0 0 11 ? * THU *)'
-      9x5default: 'cron(0 5 12 ? * TUE *)'
-      weeklytasks: 'cron(0 5 12 ? * MON *)'
-      weeklyscans: 'cron(0 5 12 ? * THU *)'
-
+      24x7a: 'cron(0 0 7 ? * TUE *)'
+      24x7b: 'cron(0 0 7 ? * WED *)'
+      24x7c: 'cron(0 0 7 ? * THU *)'
+      9x5default: 'cron(0 15 8 ? * TUE *)'
+      weeklytasks: 'cron(0 15 8 ? * MON *)'
+      weeklyscans: 'cron(0 15 8 ? * THU *)'
 
 Parameters:
 
