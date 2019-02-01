@@ -10,6 +10,8 @@ else
     BSD_DATE=true
 fi
 
+LAUNCH_DIR=`dirname $0`
+echo Launch dir: $LAUNCH_DIR
 
 ## PARMS
 REPORT_FORMAT=${REPORT_FORMAT:-"PDF"}
@@ -31,7 +33,7 @@ echo Reporting on assessment runs: [$RUNS]
 
 for ASSESSMENT_ARN in $RUNS
 do
-
+  $LAUNCH_DIR/inspector-findings-summary.py $ASSESSMENT_ARN
   COMPLETED_AT=`aws inspector describe-assessment-runs --assessment-run-arns $ASSESSMENT_ARN --query "assessmentRuns[0].completedAt" --output text`
 
   if [ "$BSD_DATE" = true ] ; then
@@ -63,4 +65,3 @@ do
   curl -s $REPORT_URL > $REPORT_FILENAME
 
 done
-

@@ -1,0 +1,127 @@
+{
+  "arn": "arn:aws:inspector:us-east-1:095493758574:target/0-upam1Mi6/template/0-nyZxudNI/run/0-B61BZFB3/finding/0-4QX3u3ZL",
+  "assetAttributes": {
+    "agentId": "i-0d0ccca56d413d5ef",
+    "amiId": "ami-b25952a5",
+    "autoScalingGroup": "awseb-e-zjuws65huw-stack-AWSEBAutoScalingGroup-1OZ7CAOQ4GH0Q",
+    "hostname": "ip-10-92-130-46.ec2.internal",
+    "ipv4Addresses": [],
+    "networkInterfaces": [{
+      "ipv6Addresses": [],
+      "networkInterfaceId": "eni-cf5b3148",
+      "privateDnsName": "ip-10-92-130-46.ec2.internal",
+      "privateIpAddress": "10.92.130.46",
+      "privateIpAddresses": [{
+        "privateDnsName": "ip-10-92-130-46.ec2.internal",
+        "privateIpAddress": "10.92.130.46"
+      }],
+      "securityGroups": [{
+          "groupId": "sg-30a1414a",
+          "groupName": "awseb-e-zjuws65huw-stack-AWSEBSecurityGroup-KFX93IDMW713"
+        },
+        {
+          "groupId": "sg-281f3453",
+          "groupName": "default"
+        }
+      ],
+      "subnetId": "subnet-48577e10",
+      "vpcId": "vpc-6c8b040b"
+    }],
+    "schemaVersion": 1,
+    "tags": [{
+        "key": "lifecycle-policy",
+        "value": "none"
+      },
+      {
+        "key": "aws:autoscaling:groupName",
+        "value": "awseb-e-zjuws65huw-stack-AWSEBAutoScalingGroup-1OZ7CAOQ4GH0Q"
+      },
+      {
+        "key": "aws:cloudformation:stack-id",
+        "value": "arn:aws:cloudformation:us-east-1:095493758574:stack/awseb-e-zjuws65huw-stack/6afaed20-5801-11e6-a307-500c219a3c36"
+      },
+      {
+        "key": "aws:cloudformation:stack-name",
+        "value": "awseb-e-zjuws65huw-stack"
+      },
+      {
+        "key": "Name",
+        "value": "cicero-original"
+      },
+      {
+        "key": "aws:cloudformation:logical-id",
+        "value": "AWSEBAutoScalingGroup"
+      },
+      {
+        "key": "Patch Group",
+        "value": "cu-cit-cloud-team-patching"
+      },
+      {
+        "key": "Inspector Group",
+        "value": "default"
+      },
+      {
+        "key": "elasticbeanstalk:environment-id",
+        "value": "e-zjuws65huw"
+      },
+      {
+        "key": "elasticbeanstalk:environment-name",
+        "value": "cicero"
+      }
+    ]
+  },
+  "assetType": "ec2-instance",
+  "attributes": [{
+      "key": "CVSS3_SCORE",
+      "value": "6.1"
+    },
+    {
+      "key": "package_name",
+      "value": "wget-0:1.18-1.18.amzn1"
+    },
+    {
+      "key": "CVSS3_VECTOR",
+      "value": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+    },
+    {
+      "key": "CVE_ID",
+      "value": "CVE-2017-6508"
+    },
+    {
+      "key": "CVSS2_VECTOR",
+      "value": "AV:N/AC:M/Au:N/C:N/I:P/A:N"
+    },
+    {
+      "key": "INSTANCE_ID",
+      "value": "i-0d0ccca56d413d5ef"
+    },
+    {
+      "key": "CVSS2_SCORE",
+      "value": "4.3"
+    }
+  ],
+  "confidence": 10,
+  "createdAt": datetime.datetime(2019, 1, 31, 11, 3, 39, 650000, tzinfo = tzlocal()),
+  "description": "CRLF injection vulnerability in the url_parse function in "
+  "url.c in Wget through 1.19.1 allows remote attackers to "
+  "inject arbitrary HTTP headers via CRLF sequences in the host "
+  "subcomponent of a URL.",
+  "id": "CVE-2017-6508",
+  "indicatorOfCompromise": False,
+  "numericSeverity": 6.0,
+  "recommendation": "Use your Operating System"
+  s update feature to update "
+  "package wget-0:1.18-1.18.amzn1. For more information see "
+  "[https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-6508](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-6508)",
+  "schemaVersion": 1,
+  "service": "Inspector",
+  "serviceAttributes": {
+    "assessmentRunArn": "arn:aws:inspector:us-east-1:095493758574:target/0-upam1Mi6/template/0-nyZxudNI/run/0-B61BZFB3",
+    "rulesPackageArn": "arn:aws:inspector:us-east-1:316112463485:rulespackage/0-gEjTy7T7",
+    "schemaVersion": 1
+  },
+  "severity": "Medium",
+  "title": "Instance i-0d0ccca56d413d5ef is vulnerable to CVE-2017-6508",
+  "updatedAt": datetime.datetime(2019, 1, 31, 11, 3, 39, 650000, tzinfo = tzlocal()),
+  "userAttributes": []
+}
