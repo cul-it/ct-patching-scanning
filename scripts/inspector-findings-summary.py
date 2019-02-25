@@ -42,7 +42,7 @@ while True:
     else:
         break
 
-print(f'Total Findings: {len(findings)}')
+print('Total Findings: ' + str(len(findings)))
 
 start = 0
 details = []
