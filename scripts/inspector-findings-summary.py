@@ -42,7 +42,7 @@ while True:
     else:
         break
 
-print('Total Findings: ' + str(len(findings)))
+print('Total Findings: {}'.format(len(findings)))
 
 start = 0
 details = []
@@ -76,8 +76,8 @@ for f in details:
     instances[id] = record
 
 for id,record in instances.items():
-    print(f'Instance: {record["name"]} ({id})')
-    print(f'\tTotal findings: {len(record["findings"])}')
+    print('Instance: {} ({})'.format(record["name"], id))
+    print('\tTotal findings: {}'.format(len(record["findings"])))
     # i = ec2.Instance(id)
     for s in severity_types:
-        print(f'\t{s}: {record.get(s, 0)}')
+        print('\t{}: {}'.format(s, record.get(s, 0)))
