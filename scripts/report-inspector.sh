@@ -45,7 +45,7 @@ do
   echo ============================================================================
   echo Assessment completed: $COMPLETED_AT
 
-  $LAUNCH_DIR/inspector-findings-summary.py $ASSESSMENT_ARN
+  # $LAUNCH_DIR/inspector-findings-summary.py $ASSESSMENT_ARN
 
   aws inspector describe-assessment-runs --assessment-run-arns $ASSESSMENT_ARN --query assessmentRuns[0].findingCounts --output table
 
