@@ -56,6 +56,6 @@ while x < len(instance_ids):
         else:
             break
 
-print('InstanceId           Failed Missing Installed InstalledOther InstalledRejected PatchGroup                 Date/Time')
+print('InstanceId           Failed Missing Installed InstalledOther InstalledRejected NotApplicable PatchGroup                 Date/Time')
 for p in patch_states:
-    print('{:20.20} {:6}  {:6}    {:6}         {:6}            {:6} {:26.26} {}'.format(p['InstanceId'],p['FailedCount'],p['MissingCount'],p['InstalledCount'],p['InstalledOtherCount'],p['InstalledRejectedCount'],p['PatchGroup'],p['OperationStartTime']))
+    print('{:20.20} {:6}  {:6}    {:6}         {:6}            {:6}        {:6} {:26.26} {}'.format(p['InstanceId'],p['FailedCount'],p['MissingCount'],p['InstalledCount'],p['InstalledOtherCount'],p['InstalledRejectedCount'],p['NotApplicableCount'],p['PatchGroup'],p['OperationStartTime']))
