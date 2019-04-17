@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Provides desummary tailed information about patch status of each running instance.
+# Provides summary detailed information about patch status of each running instance.
 # 
 # Usage:
 #
