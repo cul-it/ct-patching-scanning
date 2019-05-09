@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # summarize AWS Inspector findings
 # Usage:
@@ -14,8 +14,8 @@ sample_arn = 'arn:aws:inspector:us-east-1:095493758574:target/0-upam1Mi6/templat
 
 runs = []
 if len(sys.argv) < 2:
-    # print("Using sample AssessmentRunArn:" + sample_arn)
-    runs = [ sample_arn ]
+    print("Usage:\n\ninspector-findings-summary.py AssessmentRunArn1 AssessmentRunArn2 ...")
+    sys.exit()
 else:
     runs = sys.argv[1:len(sys.argv)]
 
