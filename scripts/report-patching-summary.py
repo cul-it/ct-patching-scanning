@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # Provides summary detailed information about patch status of each running instance.
+# Should work equally well with python2 or python3 as long as boto3 is installed.
 # 
 # Usage:
 #
