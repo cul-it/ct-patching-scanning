@@ -14,9 +14,13 @@ Set "Patch Group" = "cu-cit-cloud-team-patching" on instances which should use t
 
 Creates Systems Manager Maintenance Windows, Tasks, etc. to implement a basic patching and patch scanning process.
 
+The outputs of this template provides CLI commands that can be used to trigger out-of-cycle maintenance window tasks.
+
 ## 30-inspector.yaml
 
 Creates Inspector configuration run inspector evaluations against targeted instances.
+
+The output of this template provides a CLI command that can be used to trigger an out-of-cycle assessment run.
 
 ## 99-test-instances.windows.yaml
 
