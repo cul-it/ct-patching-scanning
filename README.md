@@ -17,3 +17,31 @@ See https://confluence.cornell.edu/display/CLOUD/Beta+AWS+Inspector+and+Patching
 ## Patch Baseline Testing
 
 The patch baselines in [cloudformation/15-patch-baselines.yaml](cloudformation/15-patch-baselines.yaml) are based on the AWS default patch baselines, but slightly modified to patch additional packages that Inspector would otherwise trigger on.
+
+## Docker
+
+This repo comes with `Dockerfile` and `docker-compose.yml` files that can help provide an execution environment for running the scripts in `scripts/`.
+
+### Prerequisites
+
+`docker` and `docker-compose` must be installed and configured. See https://docs.docker.com/install/.
+
+### Recommended Usage (docker-compose)
+
+Bring container up (it will build if there isn't one locally already):
+
+```bash
+docker-compose up --detach
+```
+
+Attach to bash shell in container to run scripts:
+
+```bash
+docker-compose exec awspython bash
+```
+
+Stop Docker container and clean up after `docker-compose`:
+
+```bash
+docker-compose down
+```
