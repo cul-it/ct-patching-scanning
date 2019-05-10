@@ -221,3 +221,11 @@ Resources:
   #       -
   #         Key: Environment
   #         Value: !Ref EnvironmentParam
+
+Outputs:
+  CLITriggerAssessmentRun:
+      Description: "CLI command to trigger Inspector assessment run"
+      Value: 
+        !Sub 
+          - 'aws inspector start-assessment-run --assessment-template-arn ${ARN} --assessment-run-name manually-triggered-assessment'
+          - { ARN: !GetAtt DefaultInspectorAssessmentTemplate.Arn }

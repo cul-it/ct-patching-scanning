@@ -646,3 +646,60 @@ Resources:
               -   echo Unsupported Linux distribution
               -   exit 1
               - fi
+
+Outputs:
+  CLIPatch24x7groupa:
+      Description: "CLI command to trigger patching for Maintenance Group 24x7-group-a"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
+          - { GROUP: "24x7-group-a" }
+
+  CLIPatch24x7groupb:
+      Description: "CLI command to trigger patching for Maintenance Group 24x7-group-a"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
+          - { GROUP: "24x7-group-b" }
+
+  CLIPatch24x7groupc:
+      Description: "CLI command to trigger patching for Maintenance Group 24x7-group-a"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
+          - { GROUP: "24x7-group-c" }
+
+  CLIPatch9x5default:
+      Description: "CLI command to trigger patching for Maintenance Group 24x7-group-a"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
+          - { GROUP: "9x5-default" }
+          
+  CLIUpdateSSMAgent:
+      Description: "CLI command to update SSM agent"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "AWS-UpdateSSMAgent" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
+          - { }
+
+  CLIInspectorAgent:
+      Description: "CLI command to update/install Inspector agent"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "AmazonInspector-ManageAWSAgent" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c"]}]' --parameters '{"Operation":["Install"]}' --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
+          - { }
+
+  CLIPatchBaselineScan:
+      Description: "CLI command to update/install Inspector agent"
+      Value: 
+        !Sub 
+          - >
+            aws ssm send-command --document-name "AWS-RunPatchBaseline" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c"]}]' --parameters '{"Operation":["Scan"]}' --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
+          - { }
