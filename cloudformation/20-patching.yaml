@@ -166,7 +166,7 @@ Resources:
       Name: 24x7-group-c
       ScheduleTimezone: US/Eastern
 
-  GroupTUE3MonthMaintenanceWindow:
+  GroupTUE3monthMaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
     Properties:
       Description: Second Tuesday of every third month
@@ -177,7 +177,7 @@ Resources:
       Name: 3-month-TUE
       ScheduleTimezone: US/Eastern
 
-  GroupWED3MonthMaintenanceWindow:
+  GroupWED3monthMaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
     Properties:
       Description: Second Wednesday of every third month
@@ -188,7 +188,7 @@ Resources:
       Name: 3-month-WED
       ScheduleTimezone: US/Eastern
 
-  GroupTHU3MonthMaintenanceWindow:
+  GroupTHU3monthMaintenanceWindow:
     Type: "AWS::SSM::MaintenanceWindow"
     Properties:
       Description: Second Thursday of every third month
@@ -296,7 +296,7 @@ Resources:
             - 24x7-group-c
       Name: 24x7-group-c-targets
 
-  GroupTUE3MonthMaintenanceWindowTarget:
+  GroupTUE3monthMaintenanceWindowTarget:
     Type: "AWS::SSM::MaintenanceWindowTarget"
     Properties:
       OwnerInformation: Group TUE 3month
@@ -310,7 +310,7 @@ Resources:
             - 3-month-TUE
       Name: 3-month-TUE-targets
 
-  GroupWED3MonthMaintenanceWindowTarget:
+  GroupWED3monthMaintenanceWindowTarget:
     Type: "AWS::SSM::MaintenanceWindowTarget"
     Properties:
       OwnerInformation: Group WED 3month
@@ -324,7 +324,7 @@ Resources:
             - 3-month-WED
       Name: 3-month-WED-targets
 
-  GroupTHU3MonthMaintenanceWindowTarget:
+  GroupTHU3monthMaintenanceWindowTarget:
     Type: "AWS::SSM::MaintenanceWindowTarget"
     Properties:
       OwnerInformation: Group THU 3month
