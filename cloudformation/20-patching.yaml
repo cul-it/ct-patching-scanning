@@ -10,9 +10,6 @@ Mappings:
       24x7a: 'cron(0 15 10 ? * MON *)'
       24x7b: 'cron(0 15 10 ? * MON *)'
       24x7c: 'cron(0 15 10 ? * MON *)'
-      3monthTUE: 'cron(0 0 7 ? */3 TUE#2 *)'
-      3monthWED: 'cron(0 0 7 ? */3 WED#2 *)'
-      3monthTHU: 'cron(0 0 7 ? */3 THU#2 *)'
       9x5default: 'cron(0 15 10 ? * MON *)'
       weeklytasks: 'cron(0 0 10 ? * MON *)'
       weeklyscans: 'cron(0 0 11 ? * MON *)'
@@ -21,9 +18,6 @@ Mappings:
       24x7a: 'cron(0 0 7 ? * MON *)'
       24x7b: 'cron(0 0 7 ? * TUE *)'
       24x7c: 'cron(0 0 7 ? * WED *)'
-      3monthTUE: 'cron(0 0 7 ? */3 TUE#2 *)'
-      3monthWED: 'cron(0 0 7 ? */3 WED#2 *)'
-      3monthTHU: 'cron(0 0 7 ? */3 THU#2 *)'
       9x5default: 'cron(0 15 8 ? * MON *)'
       weeklytasks: 'cron(0 15 8 ? * MON *)'
       weeklyscans: 'cron(0 15 8 ? * WED *)'
@@ -32,12 +26,17 @@ Mappings:
       24x7a: 'cron(0 0 7 ? * TUE *)'
       24x7b: 'cron(0 0 7 ? * WED *)'
       24x7c: 'cron(0 0 7 ? * THU *)'
-      3monthTUE: 'cron(0 0 7 ? */3 TUE#2 *)'
-      3monthWED: 'cron(0 0 7 ? */3 WED#2 *)'
-      3monthTHU: 'cron(0 0 7 ? */3 THU#2 *)'
       9x5default: 'cron(0 15 8 ? * TUE *)'
       weeklytasks: 'cron(0 15 8 ? * MON *)'
       weeklyscans: 'cron(0 15 8 ? * THU *)'
+      
+    ThreeMonthCronSchedule:
+      24x7a: 'cron(0 0 7 ? */3 TUE#2 *)'
+      24x7b: 'cron(0 0 7 ? */3 WED#2 *)'
+      24x7c: 'cron(0 0 7 ? */3 THU#2 *)'
+      9x5default: 'cron(0 15 10 ? * MON *)'
+      weeklytasks: 'cron(0 0 10 ? * MON *)'
+      weeklyscans: 'cron(0 0 11 ? * MON *)'
 
 Parameters:
 
@@ -54,6 +53,7 @@ Parameters:
       - NowCronSchedule
       - TestCronSchedule
       - ProdCronSchedule
+      - ThreeMonthCronSchedule
 
   PatchBaselineActionParam:
     Default: Scan
@@ -166,38 +166,6 @@ Resources:
       Name: 24x7-group-c
       ScheduleTimezone: US/Eastern
 
-  GroupTUE3monthMaintenanceWindow:
-    Type: "AWS::SSM::MaintenanceWindow"
-    Properties:
-      Description: Second Tuesday of every third month
-      AllowUnassociatedTargets: true
-      Cutoff: 0
-      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 3monthTUE ]
-      Duration: 1
-      Name: 3-month-TUE
-      ScheduleTimezone: US/Eastern
-
-  GroupWED3monthMaintenanceWindow:
-    Type: "AWS::SSM::MaintenanceWindow"
-    Properties:
-      Description: Second Wednesday of every third month
-      AllowUnassociatedTargets: true
-      Cutoff: 0
-      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 3monthWED ]
-      Duration: 1
-      Name: 3-month-WED
-      ScheduleTimezone: US/Eastern
-
-  GroupTHU3monthMaintenanceWindow:
-    Type: "AWS::SSM::MaintenanceWindow"
-    Properties:
-      Description: Second Thursday of every third month
-      AllowUnassociatedTargets: true
-      Cutoff: 0
-      Schedule: !FindInMap [ MapEnvironmentParams, !Ref CronScheduleGroupParam , 3monthTHU ]
-      Duration: 1
-      Name: 3-month-THU
-      ScheduleTimezone: US/Eastern
 
   WeeklyTasksMaintenanceWindowTarget:
     Type: "AWS::SSM::MaintenanceWindowTarget"
@@ -214,9 +182,6 @@ Resources:
             - 24x7-group-a
             - 24x7-group-b
             - 24x7-group-c
-            - 3-month-TUE
-            - 3-month-WED
-            - 3-month-THU
       Name: weekly-task-targets
 
   WeeklyScansMaintenanceWindowTarget:
@@ -235,9 +200,6 @@ Resources:
             - 24x7-group-a
             - 24x7-group-b
             - 24x7-group-c
-            - 3-month-TUE
-            - 3-month-WED
-            - 3-month-THU
       Name: weekly-task-targets
 
   Default9x5MaintenanceWindowTarget:
@@ -295,48 +257,6 @@ Resources:
           Values:
             - 24x7-group-c
       Name: 24x7-group-c-targets
-
-  GroupTUE3monthMaintenanceWindowTarget:
-    Type: "AWS::SSM::MaintenanceWindowTarget"
-    Properties:
-      OwnerInformation: Group TUE 3month
-      Description: Group TUE 3month
-      WindowId: !Ref GroupTUE3monthMaintenanceWindow
-      ResourceType: INSTANCE
-      Targets:
-        -
-          Key: tag:Maintenance Group
-          Values:
-            - 3-month-TUE
-      Name: 3-month-TUE-targets
-
-  GroupWED3monthMaintenanceWindowTarget:
-    Type: "AWS::SSM::MaintenanceWindowTarget"
-    Properties:
-      OwnerInformation: Group WED 3month
-      Description: Group WED 3month
-      WindowId: !Ref GroupWED3monthMaintenanceWindow
-      ResourceType: INSTANCE
-      Targets:
-        -
-          Key: tag:Maintenance Group
-          Values:
-            - 3-month-WED
-      Name: 3-month-WED-targets
-
-  GroupTHU3monthMaintenanceWindowTarget:
-    Type: "AWS::SSM::MaintenanceWindowTarget"
-    Properties:
-      OwnerInformation: Group THU 3month
-      Description: Group THU 3month
-      WindowId: !Ref GroupTHU3monthMaintenanceWindow
-      ResourceType: INSTANCE
-      Targets:
-        -
-          Key: tag:Maintenance Group
-          Values:
-            - 3-month-THU
-      Name: 3-month-THU-targets
 
   SSMMaintenanceWindowTaskRole:
     Type: AWS::IAM::Role
@@ -688,141 +608,6 @@ Resources:
         Region: !Ref AWS::Region
         S3Prefix: maintenance-window-task-logs
 
-  TUE3PatchBaselineTask:
-    Type: "AWS::SSM::MaintenanceWindowTask"
-    Properties:
-      MaxErrors: 1
-      Description: Patch baseline scan
-      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
-      Priority: 30
-      MaxConcurrency: 100%
-      Targets:
-        -
-          Key: WindowTargetIds
-          Values:
-            - !Ref GroupTUE3monthMaintenanceWindowTarget
-      Name: run-patch-baseline
-      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
-      TaskInvocationParameters:
-        MaintenanceWindowRunCommandParameters:
-          # TimeoutSeconds: Integer
-          Comment: Run patch baseline scan
-          OutputS3KeyPrefix: run-patch-baseline-logs
-          # Parameters:
-          #   Operation:
-          #     - !Ref PatchBaselineActionParam
-          # DocumentHashType: String
-          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
-          NotificationConfig:
-              NotificationArn: !Ref NotificationSNSArnParam
-              NotificationEvents:
-                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
-                  - Success
-                  - TimedOut
-                  - Cancelled
-                  - Failed
-              NotificationType: Command
-          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
-          # DocumentHash: String
-      WindowId: !Ref GroupTUE3monthMaintenanceWindow
-      # TaskParameters:
-      #   JSON object
-      TaskType: RUN_COMMAND
-      LoggingInfo:
-        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
-        Region: !Ref AWS::Region
-        S3Prefix: maintenance-window-task-logs
-
-  WED3PatchBaselineTask:
-    Type: "AWS::SSM::MaintenanceWindowTask"
-    Properties:
-      MaxErrors: 1
-      Description: Patch baseline scan
-      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
-      Priority: 30
-      MaxConcurrency: 100%
-      Targets:
-        -
-          Key: WindowTargetIds
-          Values:
-            - !Ref GroupWED3monthMaintenanceWindowTarget
-      Name: run-patch-baseline
-      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
-      TaskInvocationParameters:
-        MaintenanceWindowRunCommandParameters:
-          # TimeoutSeconds: Integer
-          Comment: Run patch baseline scan
-          OutputS3KeyPrefix: run-patch-baseline-logs
-          # Parameters:
-          #   Operation:
-          #     - !Ref PatchBaselineActionParam
-          # DocumentHashType: String
-          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
-          NotificationConfig:
-              NotificationArn: !Ref NotificationSNSArnParam
-              NotificationEvents:
-                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
-                  - Success
-                  - TimedOut
-                  - Cancelled
-                  - Failed
-              NotificationType: Command
-          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
-          # DocumentHash: String
-      WindowId: !Ref GroupWED3monthMaintenanceWindow
-      # TaskParameters:
-      #   JSON object
-      TaskType: RUN_COMMAND
-      LoggingInfo:
-        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
-        Region: !Ref AWS::Region
-        S3Prefix: maintenance-window-task-logs
-
-  THU3PatchBaselineTask:
-    Type: "AWS::SSM::MaintenanceWindowTask"
-    Properties:
-      MaxErrors: 1
-      Description: Patch baseline scan
-      ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskRole.Arn
-      Priority: 30
-      MaxConcurrency: 100%
-      Targets:
-        -
-          Key: WindowTargetIds
-          Values:
-            - !Ref GroupTHU3monthMaintenanceWindowTarget
-      Name: run-patch-baseline
-      TaskArn: !Ref PatchAndRemoveKernelsSSMDoc
-      TaskInvocationParameters:
-        MaintenanceWindowRunCommandParameters:
-          # TimeoutSeconds: Integer
-          Comment: Run patch baseline scan
-          OutputS3KeyPrefix: run-patch-baseline-logs
-          # Parameters:
-          #   Operation:
-          #     - !Ref PatchBaselineActionParam
-          # DocumentHashType: String
-          ServiceRoleArn: !GetAtt SSMMaintenanceWindowTaskCommandRole.Arn
-          NotificationConfig:
-              NotificationArn: !Ref NotificationSNSArnParam
-              NotificationEvents:
-                  # All (events), InProgress, Success, TimedOut, Cancelled, Failed.
-                  - Success
-                  - TimedOut
-                  - Cancelled
-                  - Failed
-              NotificationType: Command
-          OutputS3BucketName: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
-          # DocumentHash: String
-      WindowId: !Ref GroupTHU3monthMaintenanceWindow
-      # TaskParameters:
-      #   JSON object
-      TaskType: RUN_COMMAND
-      LoggingInfo:
-        S3Bucket: !Sub "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}"
-        Region: !Ref AWS::Region
-        S3Prefix: maintenance-window-task-logs
-
   PatchAndRemoveKernelsSSMDoc:
     Type: "AWS::SSM::Document"
     Properties:
@@ -896,30 +681,6 @@ Outputs:
             aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
           - { GROUP: "24x7-group-c" }
 
-  CLIPatchTUE3monthgroup:
-      Description: "CLI command to trigger patching for Maintenance Group 3-month-TUE"
-      Value: 
-        !Sub 
-          - >
-            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
-          - { GROUP: "3-month-TUE" }
-
-  CLIPatchWED3monthgroup:
-      Description: "CLI command to trigger patching for Maintenance Group 3-month-WED"
-      Value: 
-        !Sub 
-          - >
-            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
-          - { GROUP: "3-month-WED" }
-
-  CLIPatchTHU3monthgroup:
-      Description: "CLI command to trigger patching for Maintenance Group 3-month-THU"
-      Value: 
-        !Sub 
-          - >
-            aws ssm send-command --document-name "${PatchAndRemoveKernelsSSMDoc}" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["${GROUP}"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "run-patch-baseline-logs" --region ${AWS::Region}
-          - { GROUP: "3-month-THU" }
-
   CLIPatch9x5default:
       Description: "CLI command to trigger patching for Maintenance Group 24x7-group-a"
       Value: 
@@ -933,7 +694,7 @@ Outputs:
       Value: 
         !Sub 
           - >
-            aws ssm send-command --document-name "AWS-UpdateSSMAgent" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c", "3-month-TUE", "3-month-WED", "3-month-WED"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
+            aws ssm send-command --document-name "AWS-UpdateSSMAgent" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c"]}]' --parameters {} --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
           - { }
 
   CLIInspectorAgent:
@@ -941,7 +702,7 @@ Outputs:
       Value: 
         !Sub 
           - >
-            aws ssm send-command --document-name "AmazonInspector-ManageAWSAgent" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c", "3-month-TUE", "3-month-WED", "3-month-WED"]}]' --parameters '{"Operation":["Install"]}' --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
+            aws ssm send-command --document-name "AmazonInspector-ManageAWSAgent" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c"]}]' --parameters '{"Operation":["Install"]}' --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
           - { }
 
   CLIPatchBaselineScan:
@@ -949,5 +710,5 @@ Outputs:
       Value: 
         !Sub 
           - >
-            aws ssm send-command --document-name "AWS-RunPatchBaseline" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c", "3-month-TUE", "3-month-WED", "3-month-WED"]}]' --parameters '{"Operation":["Scan"]}' --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
+            aws ssm send-command --document-name "AWS-RunPatchBaseline" --document-version \$LATEST --targets '[{"Key":"tag:Maintenance Group","Values":["9x5-default", "24x7-group-a", "24x7-group-b", "24x7-group-c"]}]' --parameters '{"Operation":["Scan"]}' --timeout-seconds 600 --max-concurrency "100%" --max-errors "1" --output-s3-bucket-name "${LoggingBucketNamePrefixParam}-${AWS::AccountId}-${AWS::Region}" --output-s3-key-prefix "maintenance-window-task-logs" --region ${AWS::Region}
           - { }
