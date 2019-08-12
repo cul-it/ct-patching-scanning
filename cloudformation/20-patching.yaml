@@ -29,6 +29,14 @@ Mappings:
       9x5default: 'cron(0 15 8 ? * TUE *)'
       weeklytasks: 'cron(0 15 8 ? * MON *)'
       weeklyscans: 'cron(0 15 8 ? * THU *)'
+      
+    ThreeMonthCronSchedule:
+      24x7a: 'cron(0 0 7 ? */3 TUE#2 *)'
+      24x7b: 'cron(0 0 7 ? */3 WED#2 *)'
+      24x7c: 'cron(0 0 7 ? */3 THU#2 *)'
+      9x5default: 'cron(0 15 10 ? * MON *)'
+      weeklytasks: 'cron(0 0 10 ? * MON *)'
+      weeklyscans: 'cron(0 0 11 ? * MON *)'
 
 Parameters:
 
@@ -45,6 +53,7 @@ Parameters:
       - NowCronSchedule
       - TestCronSchedule
       - ProdCronSchedule
+      - ThreeMonthCronSchedule
 
   PatchBaselineActionParam:
     Default: Scan
