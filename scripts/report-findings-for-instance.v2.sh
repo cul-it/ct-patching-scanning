@@ -19,9 +19,11 @@ RESULT=`aws inspector list-findings \
   --query findingArns[] \
   --output text`
 
+echo "   "
+echo "########## HIGH SEVERITY ##########"
 for FINDING in $RESULT
 do
-  echo "- $FINDING - HIGH"
+  echo "- $FINDING"
   QUERY="findings[].[recommendation]"
   FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
 
@@ -34,11 +36,13 @@ RESULT2=`aws inspector list-findings \
   --query findingArns[] \
   --output text`
 
+echo "   "
+echo "########## Medium Severity ##########"
 for FINDING2 in $RESULT2
 do
-  echo "- $FINDING2 - Medium"
+  echo "Finding: $FINDING2"
   QUERY2="findings[].[recommendation]"
   FINDING2=`aws inspector describe-findings --finding-arns $FINDING2 --query $QUERY2 --output text`
 
-  echo $FINDING2
+  echo "Recommendation: $FINDING2"
 done
