@@ -11,7 +11,7 @@ CMD="aws ec2 describe-tags --filters Name=resource-id,Values=${INSTANCE_ID} --qu
 
 INSTANCE_NAME=`$CMD`
 
-echo ====$INSTANCE_NAME========================================
+echo ====    $INSTANCE_NAME    ========================================
 
 RESULT=`aws inspector list-findings \
   --assessment-run-arns ${INSPECTOR_ARN} \
@@ -21,9 +21,24 @@ RESULT=`aws inspector list-findings \
 
 for FINDING in $RESULT
 do
-  echo "- $FINDING"
-  QUERY="findings[].[[arn],['<br>'],[assetAttributes.tags[?key==\`Name\`].value],['<br><b>'],[severity],['<b/><br>'],[recommendation]]"
+  echo "- $FINDING - HIGH"
+  QUERY="findings[].[recommendation]"
   FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
 
   echo $FINDING
+done
+
+RESULT2=`aws inspector list-findings \
+  --assessment-run-arns ${INSPECTOR_ARN} \
+  --filter agentIds=${INSTANCE_ID},severities=Medium \
+  --query findingArns[] \
+  --output text`
+
+for FINDING2 in $RESULT2
+do
+  echo "- $FINDING2 - Medium"
+  QUERY2="findings[].[recommendation]"
+  FINDING2=`aws inspector describe-findings --finding-arns $FINDING2 --query $QUERY2 --output text`
+
+  echo $FINDING2
 done
