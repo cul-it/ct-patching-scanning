@@ -25,11 +25,14 @@ for FINDING in $RESULT
 do
   echo "     "
   echo "Finding: $FINDING"
-  QUERY=""
+  echo "     "
   DESCRIPTION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[description] --output text`
   RECOMMENDATION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[recommendation] --output text`
   echo "Description: $DESCRIPTION"
+  echo "     "
   echo "Recommendation: $RECOMMENDATION"
+  echo "     "
+  echo "----------"
 done
 
 RESULT=`aws inspector list-findings \
@@ -44,8 +47,12 @@ for FINDING in $RESULT
 do
   echo "     "
   echo "Finding: $FINDING"
-  QUERY="findings[].[recommendation]"
-  FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
-
-  echo "Recommendation: $FINDING"
+  echo "     "
+  DESCRIPTION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[description] --output text`
+  RECOMMENDATION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[recommendation] --output text`
+  echo "Description: $DESCRIPTION"
+  echo "     "
+  echo "Recommendation: $RECOMMENDATION"
+  echo "     "
+  echo "----------"
 done
