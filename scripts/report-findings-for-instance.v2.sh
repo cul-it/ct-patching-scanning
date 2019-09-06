@@ -22,7 +22,7 @@ RESULT=`aws inspector list-findings \
 for FINDING in $RESULT
 do
   echo "- $FINDING"
-  QUERY="findings[].[arn,'|',severity,'|',recommendation,'|',attributes[?key==\`package_name\`].value,'|',assetAttributes.agentId,'|',assetAttributes.tags[?key==\`Name\`].value]"
+  QUERY="findings[].[[arn],[assetAttributes.tags[?key==\`Name\`].value],[severity],[recommendation]]"
   FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
 
   echo $FINDING
