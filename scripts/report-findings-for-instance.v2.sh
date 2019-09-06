@@ -23,14 +23,15 @@ echo "   "
 echo "########## HIGH SEVERITY ##########"
 for FINDING in $RESULT
 do
-  echo "- $FINDING"
+  echo "     "
+  echo "Finding: $FINDING"
   QUERY="findings[].[recommendation]"
   FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
 
-  echo $FINDING
+  echo "Recommendation: $FINDING"
 done
 
-RESULT2=`aws inspector list-findings \
+RESULT=`aws inspector list-findings \
   --assessment-run-arns ${INSPECTOR_ARN} \
   --filter agentIds=${INSTANCE_ID},severities=Medium \
   --query findingArns[] \
@@ -38,11 +39,12 @@ RESULT2=`aws inspector list-findings \
 
 echo "   "
 echo "########## Medium Severity ##########"
-for FINDING2 in $RESULT2
+for FINDING in $RESULT
 do
-  echo "Finding: $FINDING2"
-  QUERY2="findings[].[recommendation]"
-  FINDING2=`aws inspector describe-findings --finding-arns $FINDING2 --query $QUERY2 --output text`
+  echo "     "
+  echo "Finding: $FINDING"
+  QUERY="findings[].[recommendation]"
+  FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
 
-  echo "Recommendation: $FINDING2"
+  echo "Recommendation: $FINDING"
 done
