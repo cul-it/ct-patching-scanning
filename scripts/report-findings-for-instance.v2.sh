@@ -26,8 +26,9 @@ do
   echo "     "
   echo "Finding: $FINDING"
   QUERY="findings[].[recommendation]"
+  FINDING=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[description] --output text`
+  echo "Description: $FINDING"
   FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
-
   echo "Recommendation: $FINDING"
 done
 
