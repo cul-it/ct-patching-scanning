@@ -12,7 +12,7 @@ from pprint import pprint
 
 client = boto3.client('ssm')
 
-MAX_RESULTS = 150
+MAX_RESULTS = 50
 
 next_token = None
 info = []
