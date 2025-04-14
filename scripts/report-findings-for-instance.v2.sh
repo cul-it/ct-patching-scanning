@@ -11,7 +11,7 @@ CMD="aws ec2 describe-tags --filters Name=resource-id,Values=${INSTANCE_ID} --qu
 
 INSTANCE_NAME=`$CMD`
 
-echo ====    $INSTANCE_NAME    ========================================
+echo ====$INSTANCE_NAME========================================
 
 RESULT=`aws inspector list-findings \
   --assessment-run-arns ${INSPECTOR_ARN} \
@@ -19,40 +19,11 @@ RESULT=`aws inspector list-findings \
   --query findingArns[] \
   --output text`
 
-echo "   "
-echo "########## HIGH SEVERITY ##########"
 for FINDING in $RESULT
 do
-  echo "     "
-  echo "Finding: $FINDING"
-  echo "     "
-  DESCRIPTION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[description] --output text`
-  RECOMMENDATION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[recommendation] --output text`
-  echo "Description: $DESCRIPTION"
-  echo "     "
-  echo "Recommendation: $RECOMMENDATION"
-  echo "     "
-  echo "----------"
-done
+  echo "- $FINDING"
+  QUERY="findings[].[arn,'|',severity,'|',recommendation,'|',attributes[?key==\`package_name\`].value,'|',assetAttributes.agentId,'|',assetAttributes.tags[?key==\`Name\`].value]"
+  FINDING=`aws inspector describe-findings --finding-arns $FINDING --query $QUERY --output text`
 
-RESULT=`aws inspector list-findings \
-  --assessment-run-arns ${INSPECTOR_ARN} \
-  --filter agentIds=${INSTANCE_ID},severities=Medium \
-  --query findingArns[] \
-  --output text`
-
-echo "   "
-echo "########## Medium Severity ##########"
-for FINDING in $RESULT
-do
-  echo "     "
-  echo "Finding: $FINDING"
-  echo "     "
-  DESCRIPTION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[description] --output text`
-  RECOMMENDATION=`aws inspector describe-findings --finding-arns $FINDING --query findings[].[recommendation] --output text`
-  echo "Description: $DESCRIPTION"
-  echo "     "
-  echo "Recommendation: $RECOMMENDATION"
-  echo "     "
-  echo "----------"
+  echo $FINDING
 done
